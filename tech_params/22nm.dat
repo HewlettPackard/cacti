@@ -1,0 +1,113 @@
+parameters (unit) hp  lstp   lop  lp-dram   comm-dram  
+-C_g_ideal (F/um) 3.27e-16 3.22e-16 3.16e-16 0 1.99e-16
+-C_fringe (F/um) 6e-17 8e-17 8e-17 0 5.3e-17
+-C_junc (F/um^2) 0 0 0 0 1e-15
+-C_junc_sw (F/um^2) 2.5e-16 2.5e-16 2.5e-16 2.5e-16 2.5e-16
+-l_phy (um) 0.009 0.014 0.011 0 0.022
+-l_elec (um) 0.00468 0.008 0.00604 0 0.0181
+-nmos_effective_resistance_multiplier (-) 1.45 1.99 1.73 0 1.69
+-Vdd (V) 0.8 0.8 0.6 0 0.9
+-Vth (V) 0.1395 0.40126 0.2315 0 1
+-Vdsat (V) 0.0233 0.0664 0.0181 0 0.0972
+-I_on_n (A/um) 0.0026264 0.0007276 0.0009161 0 0.0009105
+-I_on_p (A/um) 0.0013132 0.0003638 0.00045805 0 0.00045525
+
+
+
+parameters (unit) temp hp  lstp   lop  lp-dram   comm-dram  
+-I_off_n (A/um) 0 1.216e-07 2.43e-11 1.31e-08 0 1.1e-13
+-I_off_n (A/um) 10 1.24e-07 4.85e-11 2.6e-08 0 2.11e-13
+-I_off_n (A/um) 20 1.272e-07 9.68e-11 5.14e-08 0 3.88e-13
+-I_off_n (A/um) 30 1.344e-07 1.94e-10 1.02e-07 0 6.9e-13
+-I_off_n (A/um) 40 1.52e-07 3.87e-10 2.02e-07 0 1.19e-12
+-I_off_n (A/um) 50 2.152e-07 7.73e-10 3.99e-07 0 1.98e-12
+-I_off_n (A/um) 60 4.256e-07 3.55e-10 7.91e-07 0 3.22e-12
+-I_off_n (A/um) 70 8.16e-07 3.09e-09 1.09e-06 0 5.09e-12
+-I_off_n (A/um) 80 1.296e-06 6.19e-09 2.09e-06 0 7.85e-12
+-I_off_n (A/um) 90 2.184e-06 1.24e-08 4.04e-06 0 1.18e-11
+-I_off_n (A/um) 100 4.88e-06 2.48e-08 4.48e-06 0 1.72e-11
+-I_g_on_n (A/um) 0 1.81e-09 4.51e-10 2.74e-09 0 0
+-I_g_on_n (A/um) 10 1.81e-09 4.51e-10 2.74e-09 0 0
+-I_g_on_n (A/um) 20 1.81e-09 4.51e-10 2.74e-09 0 0
+-I_g_on_n (A/um) 30 1.81e-09 4.51e-10 2.74e-09 0 0
+-I_g_on_n (A/um) 40 1.81e-09 4.51e-10 2.74e-09 0 0
+-I_g_on_n (A/um) 50 1.81e-09 4.51e-10 2.74e-09 0 0
+-I_g_on_n (A/um) 60 1.81e-09 4.51e-10 2.74e-09 0 0
+-I_g_on_n (A/um) 70 1.81e-09 4.51e-10 2.74e-09 0 0
+-I_g_on_n (A/um) 80 1.81e-09 4.51e-10 2.74e-09 0 0
+-I_g_on_n (A/um) 90 1.81e-09 4.51e-10 2.74e-09 0 0
+-I_g_on_n (A/um) 100 1.81e-09 4.51e-10 2.74e-09 0 0
+
+
+parameters (unit) hp  lstp   lop  lp-dram   comm-dram  
+-C_ox (F/um^2) 3.63e-14 2.3e-14 2.87e-14 0 9.06e-15
+-t_ox (um) 0.00055 0.0011 0.0008 0 0.0035
+-n2p_drv_rt (-) 2 2 2 0 1.95
+-lch_lk_rdc (-) 0.305437 0.529101 0.420168 0 1
+-Mobility_n (um^2/V.sec) 4.2607e+10 7.3809e+10 6.9837e+10 0 3.6729e+10
+-gmp_to_gmn_multiplier (-) 1.38 0.99 1.11 0 0.9
+-vpp (V) 0 0 0 0 2.3
+
+SRAM
+parameters cell_type hp  lstp   lop  lp-dram   comm-dram  
+-Wmemcella (um) 0 1.31 1.31 1.31 1.31 1.31
+-Wmemcellpmos (um) 0 1.23 1.23 1.23 1.23 1.23
+-Wmemcellnmos (um) 0 2.08 2.08 2.08 2.08 2.08
+-area_cell (um^2) 0 146 146 146 146 146
+-asp_ratio_cell (-) 0 1.46 1.46 1.46 1.46 1.46
+
+CAM
+parameters cell_type hp  lstp   lop  lp-dram   comm-dram  
+-Wmemcella (um) 1 1.31 1.31 1.31 1.31 1.31
+-Wmemcellpmos (um) 1 1.23 1.23 1.23 1.23 1.23
+-Wmemcellnmos (um) 1 2.08 2.08 2.08 2.08 2.08
+-area_cell (um^2) 1 292 292 292 292 292
+-asp_ratio_cell (-) 1 2.92 2.92 2.92 2.92 2.92
+
+DRAM
+parameters cell_type hp  lstp   lop  lp-dram   comm-dram  
+-vdd_cell (V) 2 0 0 0 0 0
+-Wmemcella (um) 2 0 0 0 0 0.022
+-Wmemcellpmos (um) 2 0 0 0 0 0
+-Wmemcellnmos (um) 2 0 0 0 0 0
+-area_cell (um^2) 2 0 0 0 0 0.001936
+-asp_ratio_cell (-) 2 0 0 0 0 1
+
+parameters hp  lstp   lop  lp-dram   comm-dram  
+-dram_cell_I_on (A/um) 0 0 0 0 2e-05
+-dram_cell_Vdd (V) 0 0 0 0 0.9
+-dram_cell_C (F) 0 0 0 0 3e-14
+-dram_cell_I_off_worst_case_len_temp (A/um) 0 0 0 0 1e-15
+
+
+-logic_scaling_co_eff (-) 0.2401
+-core_tx_density (1/um^2) 2.55102
+-sckt_co_eff (-) 1.1296
+-chip_layout_overhead (-) 1.2
+-macro_layout_overhead (-) 1.1
+-sense_delay (sec) 3e-11
+-sense_dy_power (J) 2.16e-15
+
+parameters 0/0 0/1 0/2 0/3 1/0 1/1 1/2 1/3 
+-wire_pitch (um) 2.5 4 8 0 2.5 4 8 2
+-barrier_thickness (um) 0 0 0 0 0.003 0.003 0.003 0
+-dishing_thickness (um) 0 0 0 0 0 0 0.01936 0
+-alpha_scatter (-) 1 1 1 0 1.05 1.05 1.05 0
+-aspect_ratio (-) 3 3 3 0 2 2 2.2 0
+-miller_value (-) 1.5 1.5 1.5 0 1.5 1.5 1.5 0
+-horiz_dielectric_constant (-) 1.414 1.414 1.414 0 2.104 2.104 2.104 0
+-vert_dielectric_constant (-) 3.9 3.9 3.9 0 3.9 3.9 3.9 0
+-ild_thickness (um) 0.15 0.15 0.3 0 0.15 0.15 0.275 0
+-fringe_cap (F/um) 1.15e-16 1.15e-16 1.15e-16 1.15e-16 1.15e-16 1.15e-16 1.15e-16 1.15e-16
+-resistivity (u-ohm.m) 0.018 0.018 0.018 0.018 0.022 0.022 0.022 0.022
+
+parameters 0/0 0/1 0/2 1/0 1/1 1/2 
+-wire_r_per_micron (ohm/um) 0 0 0 0 0 0 0 545.455
+-wire_c_per_micron (F/um) 0 0 0 0 0 0 0 2.75213e-15
+-tsv_pitch (um) 0.8 40 0 1.5 9 0
+-tsv_diameter (um) 0.4 7.5 0 0.8 4.5 0
+-tsv_length (um) 4 50 0 10 25 0
+-tsv_dielec_thickness (um) 0.1 0.2 0 0.1 0.1 0
+-tsv_contact_resistance (ohm) 0.1 0.2 0 0.1 0.1 0
+-tsv_depletion_width (um) 0.6 0.6 0 0.6 0.6 0
+-tsv_liner_dielectric_cons (-) 1.414 1.414 0 2.104 2.104 0

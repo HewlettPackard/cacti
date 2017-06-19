@@ -1,0 +1,113 @@
+parameters (unit) hp  lstp   lop  lp-dram   comm-dram  
+-C_g_ideal (F/um) 1.328e-15 0 0 0 0
+-C_fringe (F/um) 1.6e-16 0 0 0 0
+-C_junc (F/um^2) 2e-15 0 0 0 0
+-C_junc_sw (F/um^2) 2.5e-16 2.5e-16 2.5e-16 2.5e-16 2.5e-16
+-l_phy (um) 0.12 0 0 0 0
+-l_elec (um) 0.1 0 0 0 0
+-nmos_effective_resistance_multiplier (-) 1.54 0 0 0 0
+-Vdd (V) 1.5 0 0 0 0
+-Vth (V) 0.4407 0 0 0 0
+-Vdsat (V) 0.256 0 0 0 0
+-I_on_n (A/um) 0.00075 0 0 0 0
+-I_on_p (A/um) 0.00035 0 0 0 0
+
+
+
+parameters (unit) temp hp  lstp   lop  lp-dram   comm-dram  
+-I_off_n (A/um) 0 7e-10 0 0 0 0
+-I_off_n (A/um) 10 8.26e-10 0 0 0 0
+-I_off_n (A/um) 20 9.74e-10 0 0 0 0
+-I_off_n (A/um) 30 1.15e-09 0 0 0 0
+-I_off_n (A/um) 40 1.35e-09 0 0 0 0
+-I_off_n (A/um) 50 1.6e-09 0 0 0 0
+-I_off_n (A/um) 60 1.88e-09 0 0 0 0
+-I_off_n (A/um) 70 2.29e-09 0 0 0 0
+-I_off_n (A/um) 80 2.7e-09 0 0 0 0
+-I_off_n (A/um) 90 3.19e-09 0 0 0 0
+-I_off_n (A/um) 100 3.76e-09 0 0 0 0
+-I_g_on_n (A/um) 0 1.65e-10 0 0 0 0
+-I_g_on_n (A/um) 10 1.65e-10 0 0 0 0
+-I_g_on_n (A/um) 20 1.65e-10 0 0 0 0
+-I_g_on_n (A/um) 30 1.65e-10 0 0 0 0
+-I_g_on_n (A/um) 40 1.65e-10 0 0 0 0
+-I_g_on_n (A/um) 50 1.65e-10 0 0 0 0
+-I_g_on_n (A/um) 60 1.65e-10 0 0 0 0
+-I_g_on_n (A/um) 70 1.65e-10 0 0 0 0
+-I_g_on_n (A/um) 80 1.65e-10 0 0 0 0
+-I_g_on_n (A/um) 90 1.65e-10 0 0 0 0
+-I_g_on_n (A/um) 100 1.65e-10 0 0 0 0
+
+
+parameters (unit) hp  lstp   lop  lp-dram   comm-dram  
+-C_ox (F/um^2) 3.58e-14 0 0 0 0
+-t_ox (um) 0.0024 0 0 0 0
+-n2p_drv_rt (-) 2.45 0 0 0 0
+-lch_lk_rdc (-) 1 0 0 0 0
+-Mobility_n (um^2/V.sec) 3.0216e+10 0 0 0 0
+-gmp_to_gmn_multiplier (-) 1.22 0 0 0 0
+-vpp (V) 0 0 0 0 0
+
+SRAM
+parameters cell_type hp  lstp   lop  lp-dram   comm-dram  
+-Wmemcella (um) 0 1.31 1.31 1.31 1.31 1.31
+-Wmemcellpmos (um) 0 1.23 1.23 1.23 1.23 1.23
+-Wmemcellnmos (um) 0 2.08 2.08 2.08 2.08 2.08
+-area_cell (um^2) 0 146 146 146 146 146
+-asp_ratio_cell (-) 0 1.46 1.46 1.46 1.46 1.46
+
+CAM
+parameters cell_type hp  lstp   lop  lp-dram   comm-dram  
+-Wmemcella (um) 1 1.31 1.31 1.31 1.31 1.31
+-Wmemcellpmos (um) 1 1.23 1.23 1.23 1.23 1.23
+-Wmemcellnmos (um) 1 2.08 2.08 2.08 2.08 2.08
+-area_cell (um^2) 1 292 292 292 292 292
+-asp_ratio_cell (-) 1 2.92 2.92 2.92 2.92 2.92
+
+DRAM
+parameters cell_type hp  lstp   lop  lp-dram   comm-dram  
+-vdd_cell (V) 2 0 0 0 0 0
+-Wmemcella (um) 2 0 0 0 0 0
+-Wmemcellpmos (um) 2 0 0 0 0 0
+-Wmemcellnmos (um) 2 0 0 0 0 0
+-area_cell (um^2) 2 0 0 0 0 0
+-asp_ratio_cell (-) 2 0 0 0 0 0
+
+parameters hp  lstp   lop  lp-dram   comm-dram  
+-dram_cell_I_on (A/um) 0 0 0 0 0
+-dram_cell_Vdd (V) 0 0 0 0 0
+-dram_cell_C (F) 0 0 0 0 0
+-dram_cell_I_off_worst_case_len_temp (A/um) 0 0 0 0 0
+
+
+-logic_scaling_co_eff (-) 1.5
+-core_tx_density (1/um^2) 0.245
+-sckt_co_eff (-) 1.11
+-chip_layout_overhead (-) 1
+-macro_layout_overhead (-) 1
+-sense_delay (sec) 2.8e-10
+-sense_dy_power (J) 1.47e-14
+
+parameters 0/0 0/1 0/2 0/3 1/0 1/1 1/2 1/3 
+-wire_pitch (um) 2.5 4 8 0 2.5 4 8 2
+-barrier_thickness (um) 0.017 0.017 0.017 0 0.017 0.017 0.017 0
+-dishing_thickness (um) 0 0 0 0 0 0 0.1584 0
+-alpha_scatter (-) 1 1 1 0 1 1 1 0
+-aspect_ratio (-) 2 2.4 2.2 0 2 2 2.2 0
+-miller_value (-) 1.5 1.5 1.5 0 1.5 1.5 1.5 0
+-horiz_dielectric_constant (-) 2.709 2.709 2.709 0 3.038 3.038 3.038 0
+-vert_dielectric_constant (-) 3.9 3.9 3.9 0 3.9 3.9 3.9 0
+-ild_thickness (um) 0.75 0.75 1.5 0 0.75 0.75 1.98 0
+-fringe_cap (F/um) 1.15e-16 1.15e-16 1.15e-16 1.15e-16 1.15e-16 1.15e-16 1.15e-16 1.15e-16
+-resistivity (u-ohm.m) 0.022 0.022 0.022 0.022 0.022 0.022 0.022 0.022
+
+parameters 0/0 0/1 0/2 1/0 1/1 1/2 
+-wire_r_per_micron (ohm/um) 0 0 0 0 0 0 0 66.6667
+-wire_c_per_micron (F/um) 0 0 0 0 0 0 0 6.51042e-16
+-tsv_pitch (um) 0 0 0 0 0 0
+-tsv_diameter (um) 0 0 0 0 0 0
+-tsv_length (um) 0 0 0 0 0 0
+-tsv_dielec_thickness (um) 0 0 0 0 0 0
+-tsv_contact_resistance (ohm) 0 0 0 0 0 0
+-tsv_depletion_width (um) 0 0 0 0 0 0
+-tsv_liner_dielectric_cons (-) 0 0 0 0 0 0

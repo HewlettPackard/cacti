@@ -1,0 +1,45 @@
+cache 4 types
+./cacti -infile test_configs/cache1.cfg #L1 2-way 32K 
+./cacti -infile test_configs/cache2.cfg #L2 4-way 256K
+./cacti -infile test_configs/cache3.cfg #L3 8-way 16M
+./cacti -infile test_configs/cache4.cfg #L1 full-asso 4K with single search port 
+RAM 4 types
+./cacti -infile test_configs/ram1.cfg # 16M
+./cacti -infile test_configs/ram2.cfg # itrs-hp itrs-lstp
+./cacti -infile test_configs/ram3.cfg # two banks no-ecc 128M
+./cacti -infile test_configs/ram4.cfg # 32K 2-way
+CAM 4 types
+./cacti -infile test_configs/cam1.cfg # same as ram1 but ram->cam and full-asso
+./cacti -infile test_configs/cam2.cfg # same as cam1 with line size = 128
+./cacti -infile test_configs/cam3.cfg # cam1 for 40nm technology
+./cacti -infile test_configs/cam4.cfg # ca1 with exclusive read and write port
+NUCA 4 types
+./cacti -infile test_configs/nuca1.cfg  #
+./cacti -infile test_configs/nuca2.cfg
+./cacti -infile test_configs/nuca3.cfg
+./cacti -infile test_configs/nuca3.cfg
+eDRAM 4 types
+./cacti -infile test_configs/edram1.cfg  #
+./cacti -infile test_configs/edram2.cfg
+./cacti -infile test_configs/edram3.cfg
+./cacti -infile test_configs/edram4.cfg
+DRAM 4 types
+./cacti -infile test_configs/dram1.cfg  #
+./cacti -infile test_configs/dram2.cfg
+./cacti -infile test_configs/dram3.cfg
+./cacti -infile test_configs/dram4.cfg
+IO 4 different parameters
+./cacti -infile test_configs/io1.cfg #
+./cacti -infile test_configs/io2.cfg
+./cacti -infile test_configs/io3.cfg
+./cacti -infile test_configs/io4.cfg
+Power gating 4 types
+./cacti -infile test_configs/power_gate1.cfg
+./cacti -infile test_configs/power_gate2.cfg
+./cacti -infile test_configs/power_gate3.cfg
+./cacti -infile test_configs/power_gate4.cfg
+3D 4 types
+./cacti -infile test_configs/3D1.cfg
+./cacti -infile test_configs/3D2.cfg
+./cacti -infile test_configs/3D3.cfg
+./cacti -infile test_configs/3D4.cfg
