@@ -1,43 +1,35 @@
-/*------------------------------------------------------------
- *                              CACTI 6.5
- *         Copyright 2008 Hewlett-Packard Development Corporation
- *                         All Rights Reserved
+/*****************************************************************************
+ *                                CACTI 7.0
+ *                      SOFTWARE LICENSE AGREEMENT
+ *            Copyright 2015 Hewlett-Packard Development Company, L.P.
+ *                          All Rights Reserved
  *
- * Permission to use, copy, and modify this software and its documentation is
- * hereby granted only under the following terms and conditions.  Both the
- * above copyright notice and this permission notice must appear in all copies
- * of the software, derivative works or modified versions, and any portions
- * thereof, and both notices must appear in supporting documentation.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met: redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer;
+ * redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution;
+ * neither the name of the copyright holders nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.”
  *
- * Users of this software agree to the terms and conditions set forth herein, and
- * hereby grant back to Hewlett-Packard Company and its affiliated companies ("HP")
- * a non-exclusive, unrestricted, royalty-free right and license under any changes, 
- * enhancements or extensions  made to the core functions of the software, including 
- * but not limited to those affording compatibility with other hardware or software
- * environments, but excluding applications which incorporate this software.
- * Users further agree to use their best efforts to return to HP any such changes,
- * enhancements or extensions that they make and inform HP of noteworthy uses of
- * this software.  Correspondence should be provided to HP at:
- *
- *                       Director of Intellectual Property Licensing
- *                       Office of Strategy and Technology
- *                       Hewlett-Packard Company
- *                       1501 Page Mill Road
- *                       Palo Alto, California  94304
- *
- * This software may be distributed (but not offered for sale or transferred
- * for compensation) to third parties, provided such third parties agree to
- * abide by the terms and conditions of this notice.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND HP DISCLAIMS ALL
- * WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS.   IN NO EVENT SHALL HP 
- * CORPORATION BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
- * DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
- * PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
- * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
- * SOFTWARE.
- *------------------------------------------------------------*/
+ ***************************************************************************/
+
+
 
 #include "nuca.h"
 #include "Ucache.h"
@@ -51,7 +43,7 @@ unsigned int MIN_BANKSIZE=65536;
 int cont_stats[2 /*l2 or l3*/][5/* cores */][ROUTER_TYPES][7 /*banks*/][8 /* cycle time */];
 
   Nuca::Nuca(
-      TechnologyParameter::DeviceType *dt = &(g_tp.peri_global)
+      /*TechnologyParameter::*/DeviceType *dt = &(g_tp.peri_global)
       ):deviceType(dt)
 {
   init_cont();
@@ -69,14 +61,14 @@ Nuca::init_cont()
     exit(0);
   }
 
-  for(int i=0; i<2; i++) { 
+  for(int i=0; i<2; i++) {
     for(int j=2; j<5; j++) {
       for(int k=0; k<ROUTER_TYPES; k++) {
         for(int l=0;l<7; l++) {
           int *temp = cont_stats[i/*l2 or l3*/][j/*core*/][k/*64 or 128 or 256 link bw*/][l /* no banks*/];
           assert(fscanf(cont, "%[^\n]\n", line) != EOF);
-          sscanf(line, "%[^:]: %d %d %d %d %d %d %d %d",jk, &temp[0], &temp[1], &temp[2], &temp[3], 
-              &temp[4], &temp[5], &temp[6], &temp[7]); 
+          sscanf(line, "%[^:]: %d %d %d %d %d %d %d %d",jk, &temp[0], &temp[1], &temp[2], &temp[3],
+              &temp[4], &temp[5], &temp[6], &temp[7]);
         }
       }
     }
@@ -87,12 +79,12 @@ Nuca::init_cont()
   void
 Nuca::print_cont_stats()
 {
-  for(int i=0; i<2; i++) { 
+  for(int i=0; i<2; i++) {
     for(int j=2; j<5; j++) {
       for(int k=0; k<ROUTER_TYPES; k++) {
         for(int l=0;l<7; l++) {
           for(int m=0;l<7; l++) {
-            cout << cont_stats[i][j][k][l][m] << " "; 
+            cout << cont_stats[i][j][k][l][m] << " ";
           }
           cout << endl;
         }
@@ -110,8 +102,8 @@ Nuca::~Nuca(){
 }
 
 /* converts latency (in s) to cycles depending upon the FREQUENCY (in GHz) */
-  int  
-Nuca::calc_cycles(double lat, double oper_freq) 
+  int
+Nuca::calc_cycles(double lat, double oper_freq)
 {
   //TODO: convert latch delay to FO4 */
   double cycle_time = (1.0/(oper_freq*1e9)); /*s*/
@@ -128,29 +120,29 @@ nuca_org_t::~nuca_org_t() {
   // if(router) delete router;
 }
 
-/* 
- * Version - 6.0 
+/*
+ * Version - 6.0
  *
  * Perform exhaustive search across different bank organizatons,
  * router configurations, grid organizations, and wire models and
  * find an optimal NUCA organization
  * For different bank count values
- * 1. Optimal bank organization is calculated  
+ * 1. Optimal bank organization is calculated
  * 2. For each bank organization, find different NUCA organizations
  *    using various router configurations, grid organizations,
- *    and wire models. 
- * 3. NUCA model with the least cost is picked for 
- *    this particular bank count 
+ *    and wire models.
+ * 3. NUCA model with the least cost is picked for
+ *    this particular bank count
  * Finally include contention statistics and find the optimal
  *    NUCA configuration
  */
-  void 
+  void
 Nuca::sim_nuca()
 {
   /* temp variables */
   int it, ro, wr;
   int num_cyc;
-  unsigned int i, j, k;
+  unsigned int i, j;//, k;
   unsigned int r, c;
   int l2_c;
   int bank_count = 0;
@@ -174,13 +166,13 @@ Nuca::sim_nuca()
   double avg_lat, avg_hop, avg_hhop, avg_vhop, avg_dyn_power,
          avg_leakage_power;
 
-  double opt_acclat = INF, opt_avg_lat = INF, opt_tot_lat = INF;
+  double opt_acclat = INF;//, opt_avg_lat = INF, opt_tot_lat = INF;
   int opt_rows = 0;
   int opt_columns = 0;
-  double opt_totno_hops = 0;
+//  double opt_totno_hops = 0;
   double opt_avg_hop = 0;
   double opt_dyn_power = 0, opt_leakage_power = 0;
-  min_values_t minval; 
+  min_values_t minval;
 
   int bank_start = 0;
 
@@ -246,10 +238,10 @@ Nuca::sim_nuca()
   for (it=bank_start; it<iterations; it++) { /* different bank count values */
     ures.tag_array2 = &tag;
     ures.data_array2 = &data;
-    /* 
-     * find the optimal bank organization 
+    /*
+     * find the optimal bank organization
      */
-    solve(&ures); 
+    solve(&ures);
 //    output_UCA(&ures);
     bank_count = g_ip->nuca_cache_sz/g_ip->cache_sz;
     cout << "====" <<  g_ip->cache_sz << "\n";
@@ -263,7 +255,7 @@ Nuca::sim_nuca()
 
         /* calculate router and wire parameters */
 
-        double vlength = ures.cache_ht; /* length of the wire (u)*/ 
+        double vlength = ures.cache_ht; /* length of the wire (u)*/
         double hlength = ures.cache_len; // u
 
         /* find delay, area, and power for wires */
@@ -284,21 +276,21 @@ Nuca::sim_nuca()
           while (bank_count%c != 0) c++;
           r = bank_count/c;
 
-          /* 
+          /*
            * to find the avg access latency of a NUCA cache, uncontended
-           * access time to each bank from the 
-           * cache controller is calculated. 
-           * avg latency = 
-           * sum of the access latencies to individual banks)/bank 
+           * access time to each bank from the
+           * cache controller is calculated.
+           * avg latency =
+           * sum of the access latencies to individual banks)/bank
            * count value.
            */
           totno_hops = totno_hhops = totno_vhops = tot_lat = 0;
-          k = 1;
+///          k = 1;
           for (i=0; i<r; i++) {
             for (j=0; j<c; j++) {
-              /* 
+              /*
                * vertical hops including the
-               * first hop from the cache controller 
+               * first hop from the cache controller
                */
               curr_hop = i + 1;
               curr_hop += j; /* horizontal hops */
@@ -317,20 +309,20 @@ Nuca::sim_nuca()
           avg_vhop = totno_vhops/bank_count;
 
           /* net access latency */
-          curr_acclat = 2*avg_lat + 2*(router_s[ro]->delay*avg_hop) + 
+          curr_acclat = 2*avg_lat + 2*(router_s[ro]->delay*avg_hop) +
             calc_cycles(ures.access_time,
                 1/(nuca_list.back()->nuca_pda.cycle_time*.001));
 
           /* avg access lat of nuca */
           avg_dyn_power =
-            avg_hop * 
+            avg_hop *
             (router_s[ro]->power.readOp.dynamic) + avg_hhop *
             (wire_horizontal[wr]->power.readOp.dynamic) *
-            (g_ip->block_sz*8 + 64) + avg_vhop * 
-            (wire_vertical[wr]->power.readOp.dynamic) * 
+            (g_ip->block_sz*8 + 64) + avg_vhop *
+            (wire_vertical[wr]->power.readOp.dynamic) *
             (g_ip->block_sz*8 + 64) + ures.power.readOp.dynamic;
 
-          avg_leakage_power = 
+          avg_leakage_power =
             bank_count * router_s[ro]->power.readOp.leakage +
             avg_hhop * (wire_horizontal[wr]->power.readOp.leakage*
                 wire_horizontal[wr]->delay) * flit_width +
@@ -339,9 +331,9 @@ Nuca::sim_nuca()
 
           if (curr_acclat < opt_acclat) {
             opt_acclat = curr_acclat;
-            opt_tot_lat = tot_lat;
-            opt_avg_lat = avg_lat;
-            opt_totno_hops = totno_hops;
+///            opt_tot_lat = tot_lat;
+///            opt_avg_lat = avg_lat;
+///            opt_totno_hops = totno_hops;
             opt_avg_hop = avg_hop;
             opt_rows = r;
             opt_columns = c;
@@ -376,15 +368,15 @@ Nuca::sim_nuca()
         if (num_cyc > 16) num_cyc = 16; // we have data only up to 16 cycles
 
         if (it < 7) {
-          nuca_list.back()->nuca_pda.delay = opt_acclat + 
+          nuca_list.back()->nuca_pda.delay = opt_acclat +
             cont_stats[l2_c][core_in][ro][it][num_cyc/2-1];
-          nuca_list.back()->contention = 
+          nuca_list.back()->contention =
             cont_stats[l2_c][core_in][ro][it][num_cyc/2-1];
         }
         else {
-          nuca_list.back()->nuca_pda.delay = opt_acclat + 
+          nuca_list.back()->nuca_pda.delay = opt_acclat +
             cont_stats[l2_c][core_in][ro][7][num_cyc/2-1];
-          nuca_list.back()->contention = 
+          nuca_list.back()->contention =
             cont_stats[l2_c][core_in][ro][7][num_cyc/2-1];
         }
         nuca_list.back()->nuca_pda.power.readOp.dynamic = opt_dyn_power;
@@ -440,12 +432,12 @@ Nuca::print_nuca (nuca_org_t *fr)
   printf("\n---------- CACTI version 6.5, Non-uniform Cache Access "
       "----------\n\n");
   printf("Optimal number of banks - %d\n", fr->bank_count);
-  printf("Grid organization rows x columns - %d x %d\n", 
+  printf("Grid organization rows x columns - %d x %d\n",
       fr->rows, fr->columns);
   printf("Network frequency - %g GHz\n",
       (1/fr->nuca_pda.cycle_time)*1e3);
   printf("Cache dimension (mm x mm) - %g x %g\n",
-      fr->nuca_pda.area.h*1e-3, 
+      fr->nuca_pda.area.h*1e-3,
       fr->nuca_pda.area.w*1e-3);
 
   fr->router->print_router();
@@ -475,18 +467,18 @@ Nuca::print_nuca (nuca_org_t *fr)
     printf("\tWire type - Low swing wires\n");
   }
 
-  printf("\tHorizontal link delay - %g (ns)\n", 
+  printf("\tHorizontal link delay - %g (ns)\n",
       fr->h_wire->delay*1e9);
-  printf("\tVertical link delay - %g (ns)\n", 
+  printf("\tVertical link delay - %g (ns)\n",
       fr->v_wire->delay*1e9);
-  printf("\tDelay/length - %g (ns/mm)\n", 
+  printf("\tDelay/length - %g (ns/mm)\n",
       fr->h_wire->delay*1e9/fr->bank_pda.area.w);
   printf("\tHorizontal link energy -dynamic/access %g (nJ)\n"
-      "\t                       -leakage %g (nW)\n\n", 
+      "\t                       -leakage %g (nW)\n\n",
       fr->h_wire->power.readOp.dynamic*1e9,
       fr->h_wire->power.readOp.leakage*1e9);
   printf("\tVertical link energy -dynamic/access %g (nJ)\n"
-      "\t                     -leakage %g (nW)\n\n", 
+      "\t                     -leakage %g (nW)\n\n",
       fr->v_wire->power.readOp.dynamic*1e9,
       fr->v_wire->power.readOp.leakage*1e9);
   printf("\n\n");
@@ -520,7 +512,7 @@ Nuca::find_optimal_nuca (list<nuca_org_t *> *n, min_values_t *minval)
     printf("NUCA___stats %d \tbankcount: lat = %g \tdynP = %g \twt = %d\t "
         "bank_dpower = %g \tleak = %g \tcycle = %g\n",
         (*niter)->bank_count,
-        (*niter)->nuca_pda.delay, 
+        (*niter)->nuca_pda.delay,
         (*niter)->nuca_pda.power.readOp.dynamic,
         (*niter)->h_wire->wt,
         (*niter)->bank_pda.power.readOp.dynamic,
@@ -546,7 +538,7 @@ Nuca::find_optimal_nuca (list<nuca_org_t *> *n, min_values_t *minval)
       }
     }
     else {
-      /* 
+      /*
        * check whether the current organization
        * meets the input deviation constraints
        */
@@ -568,8 +560,8 @@ Nuca::find_optimal_nuca (list<nuca_org_t *> *n, min_values_t *minval)
       }
       else {
         niter = n->erase(niter);
-        if (niter != n->begin())
-          niter --;
+        if (niter !=n->begin())
+        	niter --;
       }
     }
   }
@@ -582,19 +574,19 @@ Nuca::check_nuca_org (nuca_org_t *n, min_values_t *minval)
   if (((n->nuca_pda.delay - minval->min_delay)*100/minval->min_delay) > g_ip->delay_dev_nuca) {
     return 0;
   }
-  if (((n->nuca_pda.power.readOp.dynamic - minval->min_dyn)/minval->min_dyn)*100 > 
+  if (((n->nuca_pda.power.readOp.dynamic - minval->min_dyn)/minval->min_dyn)*100 >
       g_ip->dynamic_power_dev_nuca) {
     return 0;
   }
-  if (((n->nuca_pda.power.readOp.leakage - minval->min_leakage)/minval->min_leakage)*100 > 
+  if (((n->nuca_pda.power.readOp.leakage - minval->min_leakage)/minval->min_leakage)*100 >
       g_ip->leakage_power_dev_nuca) {
     return 0;
   }
-  if (((n->nuca_pda.cycle_time - minval->min_cyc)/minval->min_cyc)*100 > 
+  if (((n->nuca_pda.cycle_time - minval->min_cyc)/minval->min_cyc)*100 >
       g_ip->cycle_time_dev_nuca) {
     return 0;
   }
-  if (((n->nuca_pda.area.get_area() - minval->min_area)/minval->min_area)*100 > 
+  if (((n->nuca_pda.area.get_area() - minval->min_area)/minval->min_area)*100 >
       g_ip->area_dev_nuca) {
     return 0;
   }
@@ -602,15 +594,15 @@ Nuca::check_nuca_org (nuca_org_t *n, min_values_t *minval)
 }
 
   void
-Nuca::calculate_nuca_area (nuca_org_t *nuca) 
+Nuca::calculate_nuca_area (nuca_org_t *nuca)
 {
-  nuca->nuca_pda.area.h= 
+  nuca->nuca_pda.area.h=
     nuca->rows * ((nuca->h_wire->wire_width +
           nuca->h_wire->wire_spacing)
         * nuca->router->flit_size +
         nuca->bank_pda.area.h);
 
-  nuca->nuca_pda.area.w = 
+  nuca->nuca_pda.area.w =
     nuca->columns * ((nuca->v_wire->wire_width +
           nuca->v_wire->wire_spacing)
         * nuca->router->flit_size +

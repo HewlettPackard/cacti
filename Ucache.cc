@@ -1,43 +1,34 @@
-/*------------------------------------------------------------
- *                              CACTI 6.5
- *         Copyright 2008 Hewlett-Packard Development Corporation
- *                         All Rights Reserved
+/*****************************************************************************
+ *                                CACTI 7.0
+ *                      SOFTWARE LICENSE AGREEMENT
+ *            Copyright 2015 Hewlett-Packard Development Company, L.P.
+ *                          All Rights Reserved
  *
- * Permission to use, copy, and modify this software and its documentation is
- * hereby granted only under the following terms and conditions.  Both the
- * above copyright notice and this permission notice must appear in all copies
- * of the software, derivative works or modified versions, and any portions
- * thereof, and both notices must appear in supporting documentation.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met: redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer;
+ * redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution;
+ * neither the name of the copyright holders nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.”
  *
- * Users of this software agree to the terms and conditions set forth herein, and
- * hereby grant back to Hewlett-Packard Company and its affiliated companies ("HP")
- * a non-exclusive, unrestricted, royalty-free right and license under any changes, 
- * enhancements or extensions  made to the core functions of the software, including 
- * but not limited to those affording compatibility with other hardware or software
- * environments, but excluding applications which incorporate this software.
- * Users further agree to use their best efforts to return to HP any such changes,
- * enhancements or extensions that they make and inform HP of noteworthy uses of
- * this software.  Correspondence should be provided to HP at:
- *
- *                       Director of Intellectual Property Licensing
- *                       Office of Strategy and Technology
- *                       Hewlett-Packard Company
- *                       1501 Page Mill Road
- *                       Palo Alto, California  94304
- *
- * This software may be distributed (but not offered for sale or transferred
- * for compensation) to third parties, provided such third parties agree to
- * abide by the terms and conditions of this notice.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND HP DISCLAIMS ALL
- * WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS.   IN NO EVENT SHALL HP 
- * CORPORATION BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
- * DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
- * PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
- * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
- * SOFTWARE.
- *------------------------------------------------------------*/
+ ***************************************************************************/
+
 
 #include <time.h>
 #include <math.h>
@@ -112,6 +103,7 @@ void * calc_time_mt_wrapper(void * void_obj)
   list<mem_array *> & tag_arr    = calc_obj->tag_arr;
   bool is_tag                    = calc_obj->is_tag;
   bool pure_ram                  = calc_obj->pure_ram;
+  bool pure_cam					 = calc_obj->pure_cam;
   bool is_main_mem               = calc_obj->is_main_mem;
   double Nspd_min                = calc_obj->Nspd_min;
   min_values_t * data_res        = calc_obj->data_res;
@@ -132,13 +124,34 @@ void * calc_time_mt_wrapper(void * void_obj)
   int wt_min, wt_max;
 
   if (g_ip->force_wiretype) {
-    if (g_ip->wt == 0) {
-      wt_min = Low_swing;
-      wt_max = Low_swing;
-    }
-    else {
+    if (g_ip->wt == Full_swing) {
       wt_min = Global;
       wt_max = Low_swing-1;
+    }
+    else {
+      switch(g_ip->wt) {
+        case Global:
+          wt_min = wt_max = Global;
+          break;
+        case Global_5:
+          wt_min = wt_max = Global_5;
+          break;
+        case Global_10:
+          wt_min = wt_max = Global_10;
+          break;
+        case Global_20:
+          wt_min = wt_max = Global_20;
+          break;
+        case Global_30:
+          wt_min = wt_max = Global_30;
+          break;
+        case Low_swing:
+          wt_min = wt_max = Low_swing;
+          break;
+        default:
+          cerr << "Unknown wire type!\n";
+          exit(0);
+      }
     }
   }
   else {
@@ -148,14 +161,14 @@ void * calc_time_mt_wrapper(void * void_obj)
 
   for (double Nspd = Nspd_min; Nspd <= MAXDATASPD; Nspd *= 2)
   {
-    for (int wr = wt_min; wr <= wt_max; wr++) 
+    for (int wr = wt_min; wr <= wt_max; wr++)
     {
       for (uint32_t iter = tid; iter < niter; iter += nthreads)
       {
         // reconstruct Ndwl, Ndbl, Ndcm
         unsigned int Ndwl = 1 << (iter / (Ndbl_niter * Ndcm_niter));
         unsigned int Ndbl = 1 << ((iter / (Ndcm_niter))%Ndbl_niter);
-        unsigned int Ndcm = 1 << (iter % Ndcm_niter); 
+        unsigned int Ndcm = 1 << (iter % Ndcm_niter);
         for(unsigned int Ndsam_lev_1 = 1; Ndsam_lev_1 <= MAX_COL_MUX; Ndsam_lev_1 *= 2)
         {
           for(unsigned int Ndsam_lev_2 = 1; Ndsam_lev_2 <= MAX_COL_MUX; Ndsam_lev_2 *= 2)
@@ -168,29 +181,34 @@ void * calc_time_mt_wrapper(void * void_obj)
               Ndbl = g_ip->ndbl;
               Ndcm = g_ip->ndcm;
               if(g_ip->nspd != 0) {
-                Nspd = g_ip->nspd;
+            	  Nspd = g_ip->nspd;
               }
               if(g_ip->ndsam1 != 0) {
-                Ndsam_lev_1 = g_ip->ndsam1;
-                Ndsam_lev_2 = g_ip->ndsam2;
+            	  Ndsam_lev_1 = g_ip->ndsam1;
+            	  Ndsam_lev_2 = g_ip->ndsam2;
               }
             }
 
             if (is_tag == true)
             {
-              is_valid_partition = calculate_time(is_tag, pure_ram, Nspd, Ndwl, 
+              is_valid_partition = calculate_time(is_tag, pure_ram, pure_cam, Nspd, Ndwl,
                   Ndbl, Ndcm, Ndsam_lev_1, Ndsam_lev_2,
-                  tag_arr.back(), 0, NULL, NULL,
+                  tag_arr.back(), 0, NULL, NULL,(Wire_type) wr,
                   is_main_mem);
             }
             // If it's a fully-associative cache, the data array partition parameters are identical to that of
             // the tag array, so compute data array partition properties also here.
             if (is_tag == false || g_ip->fully_assoc)
             {
-              is_valid_partition = calculate_time(is_tag/*false*/, pure_ram, Nspd, Ndwl, 
+              is_valid_partition = calculate_time(is_tag/*false*/, pure_ram, pure_cam, Nspd, Ndwl,
                   Ndbl, Ndcm, Ndsam_lev_1, Ndsam_lev_2,
-                  data_arr.back(), 0, NULL, NULL,
+                  data_arr.back(), 0, NULL, NULL,(Wire_type) wr,
                   is_main_mem);
+              if (g_ip->is_3d_mem)
+              {
+            	  Ndsam_lev_1 = MAX_COL_MUX+1;
+            	  Ndsam_lev_2 = MAX_COL_MUX+1;
+              }
             }
 
             if (is_valid_partition)
@@ -211,15 +229,15 @@ void * calc_time_mt_wrapper(void * void_obj)
 
             if (g_ip->force_cache_config && is_tag == false)
             {
-              wr   = wt_max;
-              iter = niter;
-              if(g_ip->nspd != 0) {
-                Nspd = MAXDATASPD;
-              }
-              if (g_ip->ndsam1 != 0) {
-                Ndsam_lev_1 = MAX_COL_MUX+1;
-                Ndsam_lev_2 = MAX_COL_MUX+1;
-              }
+            	wr   = wt_max;
+            	iter = niter;
+            	if(g_ip->nspd != 0) {
+            		Nspd = MAXDATASPD;
+            	}
+            	if (g_ip->ndsam1 != 0) {
+            		Ndsam_lev_1 = MAX_COL_MUX+1;
+            		Ndsam_lev_2 = MAX_COL_MUX+1;
+            	}
             }
           }
         }
@@ -240,8 +258,9 @@ void * calc_time_mt_wrapper(void * void_obj)
 bool calculate_time(
     bool is_tag,
     int pure_ram,
+    bool pure_cam,
     double Nspd,
-    unsigned int Ndwl, 
+    unsigned int Ndwl,
     unsigned int Ndbl,
     unsigned int Ndcm,
     unsigned int Ndsam_lev_1,
@@ -250,23 +269,29 @@ bool calculate_time(
     int flag_results_populate,
     results_mem_array *ptr_results,
     uca_org_t *ptr_fin_res,
+    Wire_type wt, // merge from cacti-7 to cacti3d
     bool is_main_mem)
 {
-  DynamicParameter dyn_p(is_tag, pure_ram, Nspd, Ndwl, Ndbl, Ndcm, Ndsam_lev_1, Ndsam_lev_2, is_main_mem);
+  DynamicParameter dyn_p(is_tag, pure_ram, pure_cam, Nspd, Ndwl, Ndbl, Ndcm, Ndsam_lev_1, Ndsam_lev_2, wt, is_main_mem);
 
-  if (dyn_p.is_valid == false)
+  if (dyn_p.is_valid != true)
   {
     return false;
   }
 
   UCA * uca = new UCA(dyn_p);
 
+
   if (flag_results_populate)
   { //For the final solution, populate the ptr_results data structure  -- TODO: copy only necessary variables
   }
   else
   {
-    ptr_array->Ndwl = Ndwl;
+	  int num_act_mats_hor_dir = uca->bank.dp.num_act_mats_hor_dir;
+	  int num_mats = uca->bank.dp.num_mats;
+	  bool is_fa = uca->bank.dp.fully_assoc;
+	  bool pure_cam = uca->bank.dp.pure_cam;
+	ptr_array->Ndwl = Ndwl;
     ptr_array->Ndbl = Ndbl;
     ptr_array->Nspd = Nspd;
     ptr_array->deg_bl_muxing = dyn_p.deg_bl_muxing;
@@ -277,6 +302,13 @@ bool calculate_time(
     ptr_array->multisubbank_interleave_cycle_time = uca->multisubbank_interleave_cycle_time;
     ptr_array->area_ram_cells = uca->area_all_dataramcells;
     ptr_array->area   = uca->area.get_area();
+    if(g_ip->is_3d_mem)
+    {	//ptr_array->area   = (uca->area_all_dataramcells)/0.5;
+		ptr_array->area   = uca->area.get_area();
+		if(g_ip->num_die_3d>1)
+			ptr_array->area += uca->area_TSV_tot;
+    }
+
     ptr_array->height = uca->area.h;
     ptr_array->width  = uca->area.w;
     ptr_array->mat_height = uca->bank.mat.area.h;
@@ -295,39 +327,187 @@ bool calculate_time(
     ptr_array->delay_row_predecode_driver_and_block = uca->bank.mat.r_predec->delay;
     ptr_array->delay_row_decoder            = uca->bank.mat.row_dec->delay;
     ptr_array->delay_bitlines               = uca->bank.mat.delay_bitline;
+    ptr_array->delay_matchlines               = uca->bank.mat.delay_matchchline;
     ptr_array->delay_sense_amp              = uca->bank.mat.delay_sa;
     ptr_array->delay_subarray_output_driver = uca->bank.mat.delay_subarray_out_drv_htree;
     ptr_array->delay_dout_htree             = uca->bank.htree_out_data->delay;
     ptr_array->delay_comparator             = uca->bank.mat.delay_comparator;
 
+    if(g_ip->is_3d_mem)
+    {
+    	ptr_array->delay_row_activate_net = uca->membus_RAS->delay_bus;
+    	ptr_array->delay_row_predecode_driver_and_block = uca->membus_RAS->delay_add_predecoder;
+    	ptr_array->delay_row_decoder = uca->membus_RAS->delay_add_decoder;
+    	ptr_array->delay_local_wordline = uca->membus_RAS->delay_lwl_drv;
+    	ptr_array->delay_column_access_net = uca->membus_CAS->delay_bus;
+    	ptr_array->delay_column_predecoder = uca->membus_CAS->delay_add_predecoder;
+    	ptr_array->delay_column_decoder = uca->membus_CAS->delay_add_decoder;
+    	ptr_array->delay_column_selectline = 0; // Integrated into add_decoder
+    	ptr_array->delay_datapath_net = uca->membus_data->delay_bus;
+    	ptr_array->delay_global_data = uca->membus_data->delay_global_data;
+    	ptr_array->delay_local_data_and_drv = uca->membus_data->delay_local_data;
+    	ptr_array->delay_subarray_output_driver = uca->bank.mat.delay_subarray_out_drv;
+    	ptr_array->delay_data_buffer = uca->membus_data->delay_data_buffer;
+
+    	/*ptr_array->energy_row_activate_net = uca->membus_RAS->add_bits * (uca->membus_RAS->center_stripe->power.readOp.dynamic + uca->membus_RAS->bank_bus->power.readOp.dynamic);
+    	ptr_array->energy_row_predecode_driver_and_block = uca->membus_RAS->add_predec->power.readOp.dynamic;
+    	ptr_array->energy_row_decoder = uca->membus_RAS->add_dec->power.readOp.dynamic;
+    	ptr_array->energy_local_wordline = uca->membus_RAS->num_lwl_drv * uca->membus_RAS->lwl_drv->power.readOp.dynamic;
+    	ptr_array->energy_column_access_net = uca->membus_CAS->add_bits * (uca->membus_CAS->center_stripe->power.readOp.dynamic + uca->membus_CAS->bank_bus->power.readOp.dynamic);
+    	ptr_array->energy_column_predecoder = uca->membus_CAS->add_predec->power.readOp.dynamic;
+    	ptr_array->energy_column_decoder = uca->membus_CAS->add_dec->power.readOp.dynamic;
+    	ptr_array->energy_column_selectline = uca->membus_CAS->column_sel->power.readOp.dynamic;
+    	ptr_array->energy_datapath_net = uca->membus_data->data_bits * (uca->membus_data->center_stripe->power.readOp.dynamic + uca->membus_data->bank_bus->power.readOp.dynamic);
+    	ptr_array->energy_global_data = uca->membus_data->data_bits * (uca->membus_data->global_data->power.readOp.dynamic);
+    	ptr_array->energy_local_data_and_drv = uca->membus_data->data_bits * (uca->membus_data->data_drv->power.readOp.dynamic);
+    	ptr_array->energy_data_buffer = 0;*/
+
+    	ptr_array->energy_row_activate_net = uca->membus_RAS->power_bus.readOp.dynamic;
+    	ptr_array->energy_row_predecode_driver_and_block = uca->membus_RAS->power_add_predecoder.readOp.dynamic;
+    	ptr_array->energy_row_decoder = uca->membus_RAS->power_add_decoders.readOp.dynamic;
+    	ptr_array->energy_local_wordline = uca->membus_RAS->power_lwl_drv.readOp.dynamic;
+    	ptr_array->energy_bitlines = dyn_p.Ndwl * uca->bank.mat.power_bitline.readOp.dynamic;
+    	ptr_array->energy_sense_amp = dyn_p.Ndwl * uca->bank.mat.power_sa.readOp.dynamic;
+
+    	ptr_array->energy_column_access_net = uca->membus_CAS->power_bus.readOp.dynamic;
+    	ptr_array->energy_column_predecoder = uca->membus_CAS->power_add_predecoder.readOp.dynamic;
+    	ptr_array->energy_column_decoder = uca->membus_CAS->power_add_decoders.readOp.dynamic;
+    	ptr_array->energy_column_selectline = uca->membus_CAS->power_col_sel.readOp.dynamic;
+
+    	ptr_array->energy_datapath_net = uca->membus_data->power_bus.readOp.dynamic;
+    	ptr_array->energy_global_data = uca->membus_data->power_global_data.readOp.dynamic;
+    	ptr_array->energy_local_data_and_drv = uca->membus_data->power_local_data.readOp.dynamic;
+    	ptr_array->energy_subarray_output_driver = uca->bank.mat.power_subarray_out_drv.readOp.dynamic; //
+    	ptr_array->energy_data_buffer = 0;
+
+    	ptr_array->area_lwl_drv = uca->area_lwl_drv;
+    	ptr_array->area_row_predec_dec = uca->area_row_predec_dec;
+    	ptr_array->area_col_predec_dec = uca->area_col_predec_dec;
+    	ptr_array->area_subarray = uca->area_subarray;
+    	ptr_array->area_bus = uca->area_bus;
+    	ptr_array->area_address_bus = uca->area_address_bus;
+    	ptr_array->area_data_bus = uca->area_data_bus;
+    	ptr_array->area_data_drv = uca->area_data_drv;
+    	ptr_array->area_IOSA = uca->area_IOSA;
+    	ptr_array->area_sense_amp = uca->area_sense_amp;
+
+    }
+
     ptr_array->all_banks_height = uca->area.h;
-    ptr_array->all_banks_width  = uca->area.w;    
-    ptr_array->area_efficiency = uca->area_all_dataramcells * 100 / (uca->area.get_area());
+    ptr_array->all_banks_width  = uca->area.w;
+    //ptr_array->area_efficiency = uca->area_all_dataramcells * 100 / (uca->area.get_area());
+    ptr_array->area_efficiency = uca->area_all_dataramcells * 100 / ptr_array->area;
 
     ptr_array->power_routing_to_bank = uca->power_routing_to_bank;
     ptr_array->power_addr_input_htree = uca->bank.htree_in_add->power;
     ptr_array->power_data_input_htree = uca->bank.htree_in_data->power;
+//    cout<<"power_data_input_htree"<<uca->bank.htree_in_data->power.readOp.leakage<<endl;
     ptr_array->power_data_output_htree = uca->bank.htree_out_data->power;
+//    cout<<"power_data_output_htree"<<uca->bank.htree_out_data->power.readOp.leakage<<endl;
+    ptr_array->power_row_predecoder_drivers = uca->bank.mat.r_predec->driver_power;
+    ptr_array->power_row_predecoder_drivers.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_row_predecoder_drivers.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_row_predecoder_drivers.searchOp.dynamic *= num_act_mats_hor_dir;
 
-    ptr_array->power_row_predecoder_drivers.readOp.dynamic = uca->bank.mat.r_predec->driver_power.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_row_predecoder_blocks.readOp.dynamic = uca->bank.mat.r_predec->block_power.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
+    ptr_array->power_row_predecoder_blocks = uca->bank.mat.r_predec->block_power;
+    ptr_array->power_row_predecoder_blocks.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_row_predecoder_blocks.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_row_predecoder_blocks.searchOp.dynamic *= num_act_mats_hor_dir;
 
-    ptr_array->power_row_decoders.readOp.dynamic = uca->bank.mat.power_row_decoders.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
+    ptr_array->power_row_decoders = uca->bank.mat.power_row_decoders;
+    ptr_array->power_row_decoders.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_row_decoders.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_row_decoders.searchOp.dynamic *= num_act_mats_hor_dir;
 
-    ptr_array->power_bit_mux_predecoder_drivers.readOp.dynamic = uca->bank.mat.b_mux_predec->driver_power.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_bit_mux_predecoder_blocks.readOp.dynamic  = uca->bank.mat.b_mux_predec->block_power.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_bit_mux_decoders.readOp.dynamic = uca->bank.mat.power_bit_mux_decoders.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_senseamp_mux_lev_1_predecoder_drivers.readOp.dynamic = uca->bank.mat.sa_mux_lev_1_predec->driver_power.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_senseamp_mux_lev_1_predecoder_blocks.readOp.dynamic = uca->bank.mat.sa_mux_lev_1_predec->block_power.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_senseamp_mux_lev_1_decoders.readOp.dynamic = uca->bank.mat.power_sa_mux_lev_1_decoders.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_senseamp_mux_lev_2_predecoder_drivers.readOp.dynamic = uca->bank.mat.sa_mux_lev_2_predec->driver_power.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_senseamp_mux_lev_2_predecoder_blocks.readOp.dynamic = uca->bank.mat.sa_mux_lev_2_predec->block_power.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_senseamp_mux_lev_2_decoders.readOp.dynamic = uca->bank.mat.power_sa_mux_lev_2_decoders.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_bitlines.readOp.dynamic = uca->bank.mat.power_bitline.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_sense_amps.readOp.dynamic = uca->bank.mat.power_sa.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_prechg_eq_drivers.readOp.dynamic = uca->bank.mat.power_bl_precharge_eq_drv.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_output_drivers_at_subarray.readOp.dynamic = uca->bank.mat.power_subarray_out_drv.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
-    ptr_array->power_comparators.readOp.dynamic = uca->bank.mat.power_comparator.readOp.dynamic * dyn_p.num_act_mats_hor_dir;
+    ptr_array->power_bit_mux_predecoder_drivers = uca->bank.mat.b_mux_predec->driver_power;
+    ptr_array->power_bit_mux_predecoder_drivers.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_bit_mux_predecoder_drivers.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_bit_mux_predecoder_drivers.searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_bit_mux_predecoder_blocks  = uca->bank.mat.b_mux_predec->block_power;
+    ptr_array->power_bit_mux_predecoder_blocks.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_bit_mux_predecoder_blocks.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_bit_mux_predecoder_blocks.searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_bit_mux_decoders = uca->bank.mat.power_bit_mux_decoders;
+    ptr_array->power_bit_mux_decoders.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_bit_mux_decoders.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_bit_mux_decoders.searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_senseamp_mux_lev_1_predecoder_drivers = uca->bank.mat.sa_mux_lev_1_predec->driver_power;
+    ptr_array->power_senseamp_mux_lev_1_predecoder_drivers .readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_1_predecoder_drivers .writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_1_predecoder_drivers .searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_senseamp_mux_lev_1_predecoder_blocks = uca->bank.mat.sa_mux_lev_1_predec->block_power;
+    ptr_array->power_senseamp_mux_lev_1_predecoder_blocks.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_1_predecoder_blocks.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_1_predecoder_blocks.searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_senseamp_mux_lev_1_decoders = uca->bank.mat.power_sa_mux_lev_1_decoders;
+    ptr_array->power_senseamp_mux_lev_1_decoders.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_1_decoders.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_1_decoders.searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_senseamp_mux_lev_2_predecoder_drivers = uca->bank.mat.sa_mux_lev_2_predec->driver_power;
+    ptr_array->power_senseamp_mux_lev_2_predecoder_drivers.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_2_predecoder_drivers.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_2_predecoder_drivers.searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_senseamp_mux_lev_2_predecoder_blocks = uca->bank.mat.sa_mux_lev_2_predec->block_power;
+    ptr_array->power_senseamp_mux_lev_2_predecoder_blocks.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_2_predecoder_blocks.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_2_predecoder_blocks.searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_senseamp_mux_lev_2_decoders = uca->bank.mat.power_sa_mux_lev_2_decoders;
+    ptr_array->power_senseamp_mux_lev_2_decoders .readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_2_decoders .writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_senseamp_mux_lev_2_decoders .searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_bitlines = uca->bank.mat.power_bitline;
+    ptr_array->power_bitlines.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_bitlines.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_bitlines.searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_sense_amps = uca->bank.mat.power_sa;
+    ptr_array->power_sense_amps.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_sense_amps.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_sense_amps.searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_prechg_eq_drivers = uca->bank.mat.power_bl_precharge_eq_drv;
+    ptr_array->power_prechg_eq_drivers.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_prechg_eq_drivers.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_prechg_eq_drivers.searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_output_drivers_at_subarray = uca->bank.mat.power_subarray_out_drv;
+    ptr_array->power_output_drivers_at_subarray.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_output_drivers_at_subarray.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_output_drivers_at_subarray.searchOp.dynamic *= num_act_mats_hor_dir;
+
+    ptr_array->power_comparators = uca->bank.mat.power_comparator;
+    ptr_array->power_comparators.readOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_comparators.writeOp.dynamic *= num_act_mats_hor_dir;
+    ptr_array->power_comparators.searchOp.dynamic *= num_act_mats_hor_dir;
+
+//    cout <<  "  num of mats: " << dyn_p.num_mats << endl;
+    if (is_fa || pure_cam)
+    {
+    ptr_array->power_htree_in_search = uca->bank.htree_in_search->power;
+//    cout<<"power_htree_in_search"<<uca->bank.htree_in_search->power.readOp.leakage<<endl;
+    ptr_array->power_htree_out_search = uca->bank.htree_out_search->power;
+//    cout<<"power_htree_out_search"<<uca->bank.htree_out_search->power.readOp.leakage<<endl;
+    ptr_array->power_searchline = uca->bank.mat.power_searchline;
+//    cout<<"power_searchlineh"<<uca->bank.mat.power_searchline.readOp.leakage<<endl;
+    ptr_array->power_searchline.searchOp.dynamic *= num_mats;
+    ptr_array->power_searchline_precharge = uca->bank.mat.power_searchline_precharge;
+    ptr_array->power_searchline_precharge.searchOp.dynamic *= num_mats;
+    ptr_array->power_matchlines = uca->bank.mat.power_matchline;
+    ptr_array->power_matchlines.searchOp.dynamic *= num_mats;
+    ptr_array->power_matchline_precharge = uca->bank.mat.power_matchline_precharge;
+    ptr_array->power_matchline_precharge.searchOp.dynamic *= num_mats;
+    ptr_array->power_matchline_to_wordline_drv = uca->bank.mat.power_ml_to_ram_wl_drv;
+//    cout<<"power_matchline.searchOp.leakage"<<uca->bank.mat.power_matchline.searchOp.leakage<<endl;
+    }
 
     ptr_array->activate_energy = uca->activate_energy;
     ptr_array->read_energy = uca->read_energy;
@@ -339,7 +519,83 @@ bool calculate_time(
     ptr_array->leak_power_request_and_reply_networks = uca->leak_power_request_and_reply_networks;
 
     ptr_array->precharge_delay = uca->precharge_delay;
+
+    if(g_ip->is_3d_mem)
+    {
+    	//CACTI3DD
+    	ptr_array->t_RCD = uca->t_RCD;
+    	ptr_array->t_RAS = uca->t_RAS;
+    	ptr_array->t_RC = uca->t_RC;
+    	ptr_array->t_CAS = uca->t_CAS;
+    	ptr_array->t_RP = uca->t_RP;
+    	ptr_array->t_RRD = uca->t_RRD;
+
+    	ptr_array->activate_energy = uca->activate_energy;
+    	ptr_array->read_energy = uca->read_energy;
+    	ptr_array->write_energy = uca->write_energy;
+    	ptr_array->precharge_energy = uca->precharge_energy;
+
+
+    	ptr_array->activate_power = uca->activate_power;
+    	ptr_array->read_power = uca->read_power;
+    	ptr_array->write_power = uca->write_power;
+    	ptr_array->peak_read_power = uca->read_energy/((g_ip->burst_depth)/(g_ip->sys_freq_MHz*1e6)/2);
+
+    	ptr_array->num_row_subarray = dyn_p.num_r_subarray;
+    	ptr_array->num_col_subarray = dyn_p.num_c_subarray;
+
+
+    	ptr_array->delay_TSV_tot = uca->delay_TSV_tot;
+    	ptr_array->area_TSV_tot = uca->area_TSV_tot;
+    	ptr_array->dyn_pow_TSV_tot = uca->dyn_pow_TSV_tot;
+    	ptr_array->dyn_pow_TSV_per_access = uca->dyn_pow_TSV_per_access;
+    	ptr_array->num_TSV_tot = uca->num_TSV_tot;
+
+    	//Covers the previous values
+    	//ptr_array->area = g_ip->num_die_3d * (uca->area_per_bank * g_ip->nbanks);
+    	//ptr_array->area_efficiency = g_ip->num_die_3d * uca->area_all_dataramcells * 100 / ptr_array->area;
+    }
+//      cout<<"power_matchline.searchOp.leakage"<<uca->bank.mat.<<endl;
+//
+//    if (!(is_fa || pure_cam))
+//    {
+//     cout <<  "  num of cols: " << dyn_p.num_c_subarray << endl;
+//    }
+//    else if (is_fa)
+//    {
+//  	  cout <<  "  num of cols: " << dyn_p.tag_num_c_subarray+ dyn_p.data_num_c_subarray<< endl;
+//    } else
+//  	  cout <<  "  num of cols: " << dyn_p.tag_num_c_subarray<< endl;
+//      cout <<  uca->bank.mat.subarray.get_total_cell_area()<<endl;
+
+    if (g_ip->power_gating)
+    {
+    	ptr_array->sram_sleep_tx_width= uca->bank.mat.sram_sleep_tx->width;
+    	ptr_array->sram_sleep_tx_area= uca->bank.mat.array_sleep_tx_area;
+    	ptr_array->sram_sleep_wakeup_latency= uca->bank.mat.array_wakeup_t;
+    	ptr_array->sram_sleep_wakeup_energy= uca->bank.mat.array_wakeup_e.readOp.dynamic;
+
+    	ptr_array->wl_sleep_tx_width= uca->bank.mat.row_dec->sleeptx->width;
+    	ptr_array->wl_sleep_tx_area= uca->bank.mat.wl_sleep_tx_area;
+    	ptr_array->wl_sleep_wakeup_latency= uca->bank.mat.wl_wakeup_t;
+    	ptr_array->wl_sleep_wakeup_energy= uca->bank.mat.wl_wakeup_e.readOp.dynamic;
+
+    	ptr_array->bl_floating_wakeup_latency= uca->bank.mat.blfloating_wakeup_t;
+    	ptr_array->bl_floating_wakeup_energy= uca->bank.mat.blfloating_wakeup_e.readOp.dynamic;
+
+    	ptr_array->array_leakage= uca->bank.array_leakage;
+    	ptr_array->wl_leakage= uca->bank.wl_leakage;
+    	ptr_array->cl_leakage= uca->bank.cl_leakage;
+    }
+
+    ptr_array->num_active_mats = uca->bank.dp.num_act_mats_hor_dir;
+    ptr_array->num_submarray_mats = uca->bank.mat.num_subarrays_per_mat;
+    //    cout<<"array_leakage"<<ptr_array->array_leakage<<endl;
+//    cout<<"wl_leakage"<<ptr_array->wl_leakage<<endl;
+//    cout<<"cl_leakage"<<ptr_array->cl_leakage<<endl;
+
   }
+
 
   delete uca;
   return true;
@@ -347,48 +603,48 @@ bool calculate_time(
 
 
 
-bool check_uca_org(uca_org_t & u, min_values_t *minval) 
+bool check_uca_org(uca_org_t & u, min_values_t *minval)
 {
   if (((u.access_time - minval->min_delay)*100/minval->min_delay) > g_ip->delay_dev) {
     return false;
   }
-  if (((u.power.readOp.dynamic - minval->min_dyn)/minval->min_dyn)*100 > 
+  if (((u.power.readOp.dynamic - minval->min_dyn)/minval->min_dyn)*100 >
       g_ip->dynamic_power_dev) {
     return false;
   }
-  if (((u.power.readOp.leakage - minval->min_leakage)/minval->min_leakage)*100 > 
+  if (((u.power.readOp.leakage - minval->min_leakage)/minval->min_leakage)*100 >
       g_ip->leakage_power_dev) {
     return false;
   }
-  if (((u.cycle_time - minval->min_cyc)/minval->min_cyc)*100 > 
+  if (((u.cycle_time - minval->min_cyc)/minval->min_cyc)*100 >
       g_ip->cycle_time_dev) {
     return false;
   }
-  if (((u.area - minval->min_area)/minval->min_area)*100 > 
+  if (((u.area - minval->min_area)/minval->min_area)*100 >
       g_ip->area_dev) {
     return false;
   }
   return true;
 }
 
-bool check_mem_org(mem_array & u, const min_values_t *minval) 
+bool check_mem_org(mem_array & u, const min_values_t *minval)
 {
   if (((u.access_time - minval->min_delay)*100/minval->min_delay) > g_ip->delay_dev) {
     return false;
   }
-  if (((u.power.readOp.dynamic - minval->min_dyn)/minval->min_dyn)*100 > 
+  if (((u.power.readOp.dynamic - minval->min_dyn)/minval->min_dyn)*100 >
       g_ip->dynamic_power_dev) {
     return false;
   }
-  if (((u.power.readOp.leakage - minval->min_leakage)/minval->min_leakage)*100 > 
+  if (((u.power.readOp.leakage - minval->min_leakage)/minval->min_leakage)*100 >
       g_ip->leakage_power_dev) {
     return false;
   }
-  if (((u.cycle_time - minval->min_cyc)/minval->min_cyc)*100 > 
+  if (((u.cycle_time - minval->min_cyc)/minval->min_cyc)*100 >
       g_ip->cycle_time_dev) {
     return false;
   }
-  if (((u.area - minval->min_area)/minval->min_area)*100 > 
+  if (((u.area - minval->min_area)/minval->min_area)*100 >
       g_ip->area_dev) {
     return false;
   }
@@ -417,7 +673,7 @@ void find_optimal_uca(uca_org_t *res, min_values_t * minval, list<uca_org_t> & u
   }
 
   for (list<uca_org_t>::iterator niter = ulist.begin(); niter != ulist.end(); niter++)
-  { 
+  {
     if (g_ip->ed == 1)
     {
       cost = ((niter)->access_time/minval->min_delay) * ((niter)->power.readOp.dynamic/minval->min_dyn);
@@ -440,12 +696,12 @@ void find_optimal_uca(uca_org_t *res, min_values_t * minval, list<uca_org_t> & u
     }
     else
     {
-      /* 
+      /*
        * check whether the current organization
        * meets the input deviation constraints
        */
       bool v = check_uca_org(*niter, minval);
-      if (minval->min_leakage == 0) minval->min_leakage = 0.1; //FIXME remove this after leakage modeling
+      //if (minval->min_leakage == 0) minval->min_leakage = 0.1; //FIXME remove this after leakage modeling
 
       if (v)
       {
@@ -460,13 +716,14 @@ void find_optimal_uca(uca_org_t *res, min_values_t * minval, list<uca_org_t> & u
           min_cost = cost;
           *res = (*(niter));
           niter = ulist.erase(niter);
-          niter--;
+          if (niter!=ulist.begin())
+        	  niter--;
         }
       }
       else {
         niter = ulist.erase(niter);
-        if(niter != ulist.begin())
-          niter--;
+        if (niter!=ulist.begin())
+        	niter--;
       }
     }
   }
@@ -485,7 +742,7 @@ void filter_tag_arr(const min_values_t * min, list<mem_array *> & list)
   double cost = BIGNUM;
   double cur_cost;
   double wt_delay = g_ip->delay_wt, wt_dyn = g_ip->dynamic_power_wt, wt_leakage = g_ip->leakage_power_wt, wt_cyc = g_ip->cycle_time_wt, wt_area = g_ip->area_wt;
-  mem_array * res = NULL; 
+  mem_array * res = NULL;
 
   if (list.empty() == true)
   {
@@ -497,7 +754,7 @@ void filter_tag_arr(const min_values_t * min, list<mem_array *> & list)
   while (list.empty() != true)
   {
     bool v = check_mem_org(*list.back(), min);
-    if (v) 
+    if (v)
     {
       cur_cost = wt_delay   * (list.back()->access_time/min->min_delay) +
         wt_dyn     * (list.back()->power.readOp.dynamic/min->min_dyn) +
@@ -505,7 +762,7 @@ void filter_tag_arr(const min_values_t * min, list<mem_array *> & list)
         wt_area    * (list.back()->area/min->min_area) +
         wt_cyc     * (list.back()->cycle_time/min->min_cyc);
     }
-    else 
+    else
     {
       cur_cost = BIGNUM;
     }
@@ -524,9 +781,9 @@ void filter_tag_arr(const min_values_t * min, list<mem_array *> & list)
     }
     list.pop_back();
   }
-  if(!res) 
+  if(!res)
   {
-    cout << "ERROR: no valid tag organizations found" << endl; 
+    cout << "ERROR: no valid tag organizations found" << endl;
     exit(0);
   }
 
@@ -550,7 +807,7 @@ void filter_data_arr(list<mem_array *> & curr_list)
     mem_array * m = *iter;
 
     if (m == NULL) exit(1);
-  
+
     if(((m->access_time - m->arr_min->min_delay)/m->arr_min->min_delay > 0.5) &&
        ((m->power.readOp.dynamic - m->arr_min->min_dyn)/m->arr_min->min_dyn > 0.5))
     {
@@ -563,26 +820,26 @@ void filter_data_arr(list<mem_array *> & curr_list)
 
 
 
-/* 
- * Performs exhaustive search across different sub-array sizes, 
+/*
+ * Performs exhaustive search across different sub-array sizes,
  * wire types and aspect ratios to find an optimal UCA organization
  * 1. First different valid tag array organizations are calculated
  *    and stored in tag_arr array
  * 2. The exhaustive search is repeated to find valid data array
  *    organizations and stored in data_arr array
  * 3. Cache area, delay, power, and cycle time for different
- *    cache organizations are calculated based on the 
- *    above results 
+ *    cache organizations are calculated based on the
+ *    above results
  * 4. Cache model with least cost is picked from sol_list
  */
 void solve(uca_org_t *fin_res)
 {
-  bool   is_dram  = false;
-  int    pure_ram = (!g_ip->is_cache || g_ip->is_main_mem);
-
+  ///bool   is_dram  = false;
+  int    pure_ram = g_ip->pure_ram;
+  bool   pure_cam = g_ip->pure_cam;
 
   init_tech_params(g_ip->F_sz_um, false);
-
+  g_ip->print_detail_debug = 0; // ---detail outputs for debug, initiated for 3D memory
 
   list<mem_array *> tag_arr (0);
   list<mem_array *> data_arr(0);
@@ -606,19 +863,20 @@ void solve(uca_org_t *fin_res)
   {
     calc_array[t].tid         = t;
     calc_array[t].pure_ram    = pure_ram;
+    calc_array[t].pure_cam    = pure_cam;
     calc_array[t].data_res    = new min_values_t();
     calc_array[t].tag_res     = new min_values_t();
   }
 
   bool     is_tag;
-  uint32_t ram_cell_tech_type;
+  ///uint32_t ram_cell_tech_type;
 
   // If it's a cache, first calculate the area, delay and power for all tag array partitions.
-  if (!pure_ram)
+  if (!(pure_ram||pure_cam||g_ip->fully_assoc))
   { //cache
     is_tag              = true;
-    ram_cell_tech_type  = g_ip->tag_arr_ram_cell_tech_type;
-    is_dram             = ((ram_cell_tech_type == lp_dram) || (ram_cell_tech_type == comm_dram));
+   /// ram_cell_tech_type  = g_ip->tag_arr_ram_cell_tech_type;
+  ///  is_dram             = ((ram_cell_tech_type == lp_dram) || (ram_cell_tech_type == comm_dram));
     init_tech_params(g_ip->F_sz_um, is_tag);
 
     for (uint32_t t = 0; t < nthreads; t++)
@@ -645,18 +903,26 @@ void solve(uca_org_t *fin_res)
 
 
   // calculate the area, delay and power for all data array partitions (for cache or plain RAM).
-  if (!g_ip->fully_assoc)
-  {
+//  if (!g_ip->fully_assoc)
+// {//in the new cacti, cam, fully_associative cache are processed as single array in the data portion
     is_tag              = false;
-    ram_cell_tech_type  = g_ip->data_arr_ram_cell_tech_type;
-    is_dram             = ((ram_cell_tech_type == lp_dram) || (ram_cell_tech_type == comm_dram));
+   /// ram_cell_tech_type  = g_ip->data_arr_ram_cell_tech_type;
+   /// is_dram             = ((ram_cell_tech_type == lp_dram) || (ram_cell_tech_type == comm_dram));
     init_tech_params(g_ip->F_sz_um, is_tag);
 
     for (uint32_t t = 0; t < nthreads; t++)
     {
       calc_array[t].is_tag      = is_tag;
       calc_array[t].is_main_mem = g_ip->is_main_mem;
-      calc_array[t].Nspd_min    = (double)(g_ip->out_w)/(double)(g_ip->block_sz*8);
+      if (!(pure_cam||g_ip->fully_assoc))
+      {
+    	  calc_array[t].Nspd_min    = (double)(g_ip->out_w)/(double)(g_ip->block_sz*8);
+      }
+      else
+      {
+    	  calc_array[t].Nspd_min    = 1;
+      }
+
       pthread_create(&threads[t], NULL, calc_time_mt_wrapper, (void *)(&(calc_array[t])));
     }
 
@@ -671,14 +937,14 @@ void solve(uca_org_t *fin_res)
       calc_array[t].data_arr.sort(mem_array::lt);
       data_arr.merge(calc_array[t].data_arr, mem_array::lt);
     }
-  }
+//  }
 
 
   min_values_t * d_min = new min_values_t();
   min_values_t * t_min = new min_values_t();
   min_values_t * cache_min = new min_values_t();
 
-  for (uint32_t t = 0; t < nthreads; t++) 
+  for (uint32_t t = 0; t < nthreads; t++)
   {
     d_min->update_min_values(calc_array[t].data_res);
     t_min->update_min_values(calc_array[t].tag_res);
@@ -689,16 +955,17 @@ void solve(uca_org_t *fin_res)
     (*miter)->arr_min = d_min;
   }
 
+
   //cout << data_arr.size() << "\t" << tag_arr.size() <<" before\n";
   filter_data_arr(data_arr);
-  if(!pure_ram)
+  if(!(pure_ram||pure_cam||g_ip->fully_assoc))
   {
     filter_tag_arr(t_min, tag_arr);
   }
   //cout << data_arr.size() << "\t" << tag_arr.size() <<" after\n";
 
 
-  if (pure_ram == true)
+  if (pure_ram||pure_cam||g_ip->fully_assoc)
   {
     for (miter = data_arr.begin(); miter != data_arr.end(); miter++)
     {
@@ -719,7 +986,7 @@ void solve(uca_org_t *fin_res)
   }
   else
   {
-    while (tag_arr.empty() != true) 
+    while (tag_arr.empty() != true)
     {
       mem_array * arr_temp = (tag_arr.back());
       //delete tag_arr.back();
@@ -769,5 +1036,38 @@ void solve(uca_org_t *fin_res)
   delete cache_min;
   delete d_min;
   delete t_min;
+}
+
+void update(uca_org_t *fin_res)
+{
+  if(fin_res->tag_array2)
+  {
+    init_tech_params(g_ip->F_sz_um,true);
+    DynamicParameter tag_arr_dyn_p(true, g_ip->pure_ram, g_ip->pure_cam, fin_res->tag_array2->Nspd, fin_res->tag_array2->Ndwl, fin_res->tag_array2->Ndbl, fin_res->tag_array2->Ndcm, fin_res->tag_array2->Ndsam_lev_1, fin_res->tag_array2->Ndsam_lev_2, fin_res->data_array2->wt, g_ip->is_main_mem);
+    if(tag_arr_dyn_p.is_valid)
+    {
+      UCA * tag_arr = new UCA(tag_arr_dyn_p);
+      fin_res->tag_array2->power = tag_arr->power;
+    }
+    else
+    {
+      cout << "ERROR: Cannot retrieve array structure for leakage feedback" << endl;
+      exit(1);
+    }
+  }
+  init_tech_params(g_ip->F_sz_um,false);
+  DynamicParameter data_arr_dyn_p(false, g_ip->pure_ram, g_ip->pure_cam, fin_res->data_array2->Nspd, fin_res->data_array2->Ndwl, fin_res->data_array2->Ndbl, fin_res->data_array2->Ndcm, fin_res->data_array2->Ndsam_lev_1, fin_res->data_array2->Ndsam_lev_2, fin_res->data_array2->wt, g_ip->is_main_mem);
+  if(data_arr_dyn_p.is_valid)
+  {
+    UCA * data_arr = new UCA(data_arr_dyn_p);
+    fin_res->data_array2->power = data_arr->power;
+  }
+  else
+  {
+    cout << "ERROR: Cannot retrieve array structure for leakage feedback" << endl;
+    exit(1);
+  }
+
+  fin_res->find_energy();
 }
 

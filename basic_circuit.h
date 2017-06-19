@@ -1,54 +1,51 @@
-/*------------------------------------------------------------
- *                              CACTI 6.5
- *         Copyright 2008 Hewlett-Packard Development Corporation
- *                         All Rights Reserved
+/*****************************************************************************
+ *                                CACTI 7.0
+ *                      SOFTWARE LICENSE AGREEMENT
+ *            Copyright 2015 Hewlett-Packard Development Company, L.P.
+ *                          All Rights Reserved
  *
- * Permission to use, copy, and modify this software and its documentation is
- * hereby granted only under the following terms and conditions.  Both the
- * above copyright notice and this permission notice must appear in all copies
- * of the software, derivative works or modified versions, and any portions
- * thereof, and both notices must appear in supporting documentation.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met: redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer;
+ * redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution;
+ * neither the name of the copyright holders nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.”
  *
- * Users of this software agree to the terms and conditions set forth herein, and
- * hereby grant back to Hewlett-Packard Company and its affiliated companies ("HP")
- * a non-exclusive, unrestricted, royalty-free right and license under any changes, 
- * enhancements or extensions  made to the core functions of the software, including 
- * but not limited to those affording compatibility with other hardware or software
- * environments, but excluding applications which incorporate this software.
- * Users further agree to use their best efforts to return to HP any such changes,
- * enhancements or extensions that they make and inform HP of noteworthy uses of
- * this software.  Correspondence should be provided to HP at:
- *
- *                       Director of Intellectual Property Licensing
- *                       Office of Strategy and Technology
- *                       Hewlett-Packard Company
- *                       1501 Page Mill Road
- *                       Palo Alto, California  94304
- *
- * This software may be distributed (but not offered for sale or transferred
- * for compensation) to third parties, provided such third parties agree to
- * abide by the terms and conditions of this notice.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND HP DISCLAIMS ALL
- * WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS.   IN NO EVENT SHALL HP 
- * CORPORATION BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
- * DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
- * PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
- * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
- * SOFTWARE.
- *------------------------------------------------------------*/
+ ***************************************************************************/
+
+
 
 #ifndef __BASIC_CIRCUIT_H__
 #define __BASIC_CIRCUIT_H__
 
 #include "const.h"
-#include "cacti_interface.h"
+///#include "cacti_interface.h"
 
+using namespace std;
+
+#define UNI_LEAK_STACK_FACTOR 0.43
 
 int powers (int base, int n);
 bool is_pow2(int64_t val);
 uint32_t _log2(uint64_t num);
+int factorial(int n, int m = 1);
+int combination(int n, int m);
 
 //#define DBG
 #ifdef DBG
@@ -72,25 +69,58 @@ enum Htree_type {
     Add_htree,
     Data_in_htree,
     Data_out_htree,
+    Search_in_htree,
+    Search_out_htree,
 };
 
+//CACTI3DD
+enum Memorybus_type {
+	Row_add_path,
+	Col_add_path,
+	Data_path
+	/*in_network,
+	out_network*/
+};
 
+/*enum Part_grain {
+	Coarse_rank_level, //amsung 2009 3D DRAM
+	Fine_rank_level, //Micron HMC 2011
+	Coarse_bank_level, //ITRS fine TSV supported
+	Fine_bank_level
+};*/
+
+enum Gate_type {
+    nmos,
+    pmos,
+	inv,
+    nand,
+    nor,
+    tri,
+    tg
+};
+
+enum Half_net_topology {
+    parallel,
+    series
+};
 
 double logtwo (double x);
 
 double gate_C(
-    double width, 
+    double width,
     double wirelength,
     bool _is_dram = false,
     bool _is_sram = false,
-    bool _is_wl_tr = false);
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false);
 
 double gate_C_pass(
     double width,
     double wirelength,
     bool   _is_dram = false,
     bool   _is_sram = false,
-    bool   _is_wl_tr = false);
+    bool   _is_wl_tr = false,
+    bool _is_sleep_tx = false);
 
 double drain_C_(
     double width,
@@ -100,22 +130,25 @@ double drain_C_(
     double fold_dimension,
     bool _is_dram = false,
     bool _is_sram = false,
-    bool _is_wl_tr = false);
- 
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false);
+
 double tr_R_on(
     double width,
     int nchannel,
     int stack,
     bool _is_dram = false,
     bool _is_sram = false,
-    bool _is_wl_tr = false);
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false);
 
 double R_to_w(
     double res,
     int nchannel,
     bool _is_dram = false,
     bool _is_sram = false,
-    bool _is_wl_tr = false);
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false);
 
 double horowitz (
     double inputramptime,
@@ -126,26 +159,147 @@ double horowitz (
 
 double pmos_to_nmos_sz_ratio(
     bool _is_dram = false,
-    bool _is_wl_tr = false);
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false);
 
 double simplified_nmos_leakage(
     double nwidth,
     bool _is_dram = false,
     bool _is_cell = false,
-    bool _is_wl_tr = false);
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false);
 
 double simplified_pmos_leakage(
     double pwidth,
     bool _is_dram = false,
     bool _is_cell = false,
-    bool _is_wl_tr = false);
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false);
 
+double simplified_nmos_Isat(
+    double nwidth,
+    bool _is_dram = false,
+    bool _is_cell = false,
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false);
+
+double simplified_pmos_Isat(
+    double pwidth,
+    bool _is_dram = false,
+    bool _is_cell = false,
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false);
 
 double cmos_Ileak(
     double nWidth,
     double pWidth,
     bool _is_dram = false,
     bool _is_cell = false,
-    bool _is_wl_tr = false);
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false);
+
+double cmos_Ig_n(
+    double nWidth,
+    bool _is_dram = false,
+    bool _is_cell = false,
+    bool _is_wl_tr= false,
+    bool _is_sleep_tx = false);
+
+double cmos_Ig_p(
+    double pWidth,
+    bool _is_dram = false,
+    bool _is_cell = false,
+    bool _is_wl_tr= false,
+    bool _is_sleep_tx = false);
+
+
+double cmos_Isub_leakage(
+    double nWidth,
+    double pWidth,
+    int    fanin,
+    enum Gate_type g_type,
+    bool _is_dram = false,
+    bool _is_cell = false,
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false,
+    enum Half_net_topology topo = series);
+
+double cmos_Ig_leakage(
+    double nWidth,
+    double pWidth,
+    int    fanin,
+    enum Gate_type g_type,
+    bool _is_dram = false,
+    bool _is_cell = false,
+    bool _is_wl_tr = false,
+    bool _is_sleep_tx = false,
+    enum Half_net_topology topo = series);
+
+double shortcircuit(
+    double vt,
+    double velocity_index,
+    double c_in,
+    double c_out,
+    double w_nmos,
+    double w_pmos,
+    double i_on_n,
+    double i_on_p,
+    double i_on_n_in,
+    double i_on_p_in,
+    double vdd);
+
+double shortcircuit_simple(
+    double vt,
+    double velocity_index,
+    double c_in,
+    double c_out,
+    double w_nmos,
+    double w_pmos,
+    double i_on_n,
+    double i_on_p,
+    double i_on_n_in,
+    double i_on_p_in,
+    double vdd);
+//set power point product mask; strictly speaking this is not real point product
+inline void set_pppm(
+	double * pppv,
+	double a=1,
+    double b=1,
+    double c=1,
+    double d=1
+    ){
+		pppv[0]= a;
+		pppv[1]= b;
+		pppv[2]= c;
+		pppv[3]= d;
+
+}
+
+inline void set_sppm(
+	double * sppv,
+	double a=1,
+    double b=1,
+    double c=1,
+    double d=1
+    ){
+		sppv[0]= a;
+		sppv[1]= b;
+		sppv[2]= c;
+}
+
+//ali 
+double wire_resistance(double resistivity, double wire_width, double wire_thickness,
+    double barrier_thickness, double dishing_thickness, double alpha_scatter);
+   
+double wire_capacitance(double wire_width, double wire_thickness, double wire_spacing,
+    double ild_thickness, double miller_value, double horiz_dielectric_constant,
+    double vert_dielectric_constant, double fringe_cap);    
+
+double tsv_resistance(double resistivity, double tsv_len, double tsv_diam, double tsv_contact_resistance);
+
+double tsv_capacitance(double tsv_len, double tsv_diam, double tsv_pitch, double dielec_thickness, double liner_dielectric_constant, double depletion_width);
+
+double tsv_area(double tsv_pitch);
+// end ali
 
 #endif

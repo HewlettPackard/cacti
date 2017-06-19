@@ -1,49 +1,42 @@
-/*------------------------------------------------------------
- *                              CACTI 6.5
- *         Copyright 2008 Hewlett-Packard Development Corporation
- *                         All Rights Reserved
+/*****************************************************************************
+ *                                CACTI 7.0
+ *                      SOFTWARE LICENSE AGREEMENT
+ *            Copyright 2015 Hewlett-Packard Development Company, L.P.
+ *                          All Rights Reserved
  *
- * Permission to use, copy, and modify this software and its documentation is
- * hereby granted only under the following terms and conditions.  Both the
- * above copyright notice and this permission notice must appear in all copies
- * of the software, derivative works or modified versions, and any portions
- * thereof, and both notices must appear in supporting documentation.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are
+ * met: redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer;
+ * redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution;
+ * neither the name of the copyright holders nor the names of its
+ * contributors may be used to endorse or promote products derived from
+ * this software without specific prior written permission.
+
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.”
  *
- * Users of this software agree to the terms and conditions set forth herein, and
- * hereby grant back to Hewlett-Packard Company and its affiliated companies ("HP")
- * a non-exclusive, unrestricted, royalty-free right and license under any changes, 
- * enhancements or extensions  made to the core functions of the software, including 
- * but not limited to those affording compatibility with other hardware or software
- * environments, but excluding applications which incorporate this software.
- * Users further agree to use their best efforts to return to HP any such changes,
- * enhancements or extensions that they make and inform HP of noteworthy uses of
- * this software.  Correspondence should be provided to HP at:
- *
- *                       Director of Intellectual Property Licensing
- *                       Office of Strategy and Technology
- *                       Hewlett-Packard Company
- *                       1501 Page Mill Road
- *                       Palo Alto, California  94304
- *
- * This software may be distributed (but not offered for sale or transferred
- * for compensation) to third parties, provided such third parties agree to
- * abide by the terms and conditions of this notice.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND HP DISCLAIMS ALL
- * WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS.   IN NO EVENT SHALL HP 
- * CORPORATION BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL
- * DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR
- * PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS
- * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS
- * SOFTWARE.
- *------------------------------------------------------------*/
+ ***************************************************************************/
+
+
 
 
 #include "basic_circuit.h"
 #include "parameter.h"
 #include <iostream>
 #include <assert.h>
+#include <cmath>
 
 uint32_t _log2(uint64_t num)
 {
@@ -61,7 +54,7 @@ uint32_t _log2(uint64_t num)
     log2++;
   }
 
-  return log2;
+  return log2; 
 }
 
 
@@ -108,12 +101,13 @@ double gate_C(
     double wirelength,
     bool   _is_dram,
     bool   _is_cell,
-    bool   _is_wl_tr)
+    bool   _is_wl_tr,
+    bool   _is_sleep_tx)
 {
-  const TechnologyParameter::DeviceType * dt;
+  const /*TechnologyParameter::*/DeviceType * dt;
 
   if (_is_dram && _is_cell)
-  { 
+  {
     dt = &g_tp.dram_acc;   //DRAM cell access transistor
   }
   else if (_is_dram && _is_wl_tr)
@@ -123,6 +117,10 @@ double gate_C(
   else if (!_is_dram && _is_cell)
   {
     dt = &g_tp.sram_cell;  // SRAM cell access transistor
+  }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
   }
   else
   {
@@ -140,13 +138,14 @@ double gate_C_pass(
     double wirelength,  // poly wire length going to gate in lambda
     bool   _is_dram,
     bool   _is_cell,
-    bool   _is_wl_tr)
+    bool   _is_wl_tr,
+    bool   _is_sleep_tx)
 {
   // v5.0
-  const TechnologyParameter::DeviceType * dt;
+  const /*TechnologyParameter::*/DeviceType * dt;
 
   if ((_is_dram) && (_is_cell))
-  { 
+  {
     dt = &g_tp.dram_acc;   //DRAM cell access transistor
   }
   else if ((_is_dram) && (_is_wl_tr))
@@ -156,6 +155,10 @@ double gate_C_pass(
   else if ((!_is_dram) && _is_cell)
   {
     dt = &g_tp.sram_cell;  // SRAM cell access transistor
+  }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
   }
   else
   {
@@ -175,13 +178,14 @@ double drain_C_(
     double fold_dimension,
     bool _is_dram,
     bool _is_cell,
-    bool _is_wl_tr)
+    bool _is_wl_tr,
+    bool _is_sleep_tx)
 {
   double w_folded_tr;
-  const  TechnologyParameter::DeviceType * dt;
+  const  /*TechnologyParameter::*/DeviceType * dt;
 
   if ((_is_dram) && (_is_cell))
-  { 
+  {
     dt = &g_tp.dram_acc;   // DRAM cell access transistor
   }
   else if ((_is_dram) && (_is_wl_tr))
@@ -191,6 +195,10 @@ double drain_C_(
   else if ((!_is_dram) && _is_cell)
   {
     dt = &g_tp.sram_cell;  // SRAM cell access transistor
+  }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
   }
   else
   {
@@ -205,12 +213,12 @@ double drain_C_(
 
   // determine the width of the transistor after folding (if it is getting folded)
   if (next_arg_thresh_folding_width_or_height_cell == 0)
-  { // interpret fold_dimension as the the folding width threshold 
+  { // interpret fold_dimension as the the folding width threshold
     // i.e. the value of transistor width above which the transistor gets folded
     w_folded_tr = fold_dimension;
-  } 
+  }
   else
-  { // interpret fold_dimension as the height of the cell that this transistor is part of. 
+  { // interpret fold_dimension as the height of the cell that this transistor is part of.
     double h_tr_region  = fold_dimension - 2 * g_tp.HPOWERRAIL;
     // TODO : w_folded_tr must come from Component::compute_gate_area()
     double ratio_p_to_n = 2.0 / (2.0 + 1.0);
@@ -261,12 +269,13 @@ double tr_R_on(
     int stack,
     bool _is_dram,
     bool _is_cell,
-    bool _is_wl_tr)
+    bool _is_wl_tr,
+    bool _is_sleep_tx)
 {
-  const TechnologyParameter::DeviceType * dt;
+  const /*TechnologyParameter::*/DeviceType * dt;
 
   if ((_is_dram) && (_is_cell))
-  { 
+  {
     dt = &g_tp.dram_acc;   //DRAM cell access transistor
   }
   else if ((_is_dram) && (_is_wl_tr))
@@ -276,6 +285,10 @@ double tr_R_on(
   else if ((!_is_dram) && _is_cell)
   {
     dt = &g_tp.sram_cell;  // SRAM cell access transistor
+  }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
   }
   else
   {
@@ -297,12 +310,13 @@ double R_to_w(
     int   nchannel,
     bool _is_dram,
     bool _is_cell,
-    bool _is_wl_tr)
+    bool _is_wl_tr,
+    bool _is_sleep_tx)
 {
-  const TechnologyParameter::DeviceType * dt;
+  const /*TechnologyParameter::*/DeviceType * dt;
 
   if ((_is_dram) && (_is_cell))
-  { 
+  {
     dt = &g_tp.dram_acc;   //DRAM cell access transistor
   }
   else if ((_is_dram) && (_is_wl_tr))
@@ -312,6 +326,10 @@ double R_to_w(
   else if ((!_is_dram) && (_is_cell))
   {
     dt = &g_tp.sram_cell;  // SRAM cell access transistor
+  }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
   }
   else
   {
@@ -325,12 +343,17 @@ double R_to_w(
 
 double pmos_to_nmos_sz_ratio(
     bool _is_dram,
-    bool _is_wl_tr)
+    bool _is_wl_tr,
+    bool _is_sleep_tx)
 {
   double p_to_n_sizing_ratio;
   if ((_is_dram) && (_is_wl_tr))
   { //DRAM wordline transistor
     p_to_n_sizing_ratio = g_tp.dram_wl.n_to_p_eff_curr_drv_ratio;
+  }
+  else if (_is_sleep_tx)
+  {
+	p_to_n_sizing_ratio = g_tp.sleep_tx.n_to_p_eff_curr_drv_ratio;  // Sleep transistor
   }
   else
   { //DRAM or SRAM all other transistors
@@ -373,9 +396,10 @@ double cmos_Ileak(
     double pWidth,
     bool _is_dram,
     bool _is_cell,
-    bool _is_wl_tr)
+    bool _is_wl_tr,
+    bool _is_sleep_tx)
 {
-  TechnologyParameter::DeviceType * dt;
+  /*TechnologyParameter::*/DeviceType * dt;
 
   if ((!_is_dram)&&(_is_cell))
   { //SRAM cell access transistor
@@ -384,6 +408,10 @@ double cmos_Ileak(
   else if ((_is_dram)&&(_is_wl_tr))
   { //DRAM wordline transistor
     dt = &(g_tp.dram_wl);
+  }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
   }
   else
   { //DRAM or SRAM all other transistors
@@ -392,14 +420,29 @@ double cmos_Ileak(
   return nWidth*dt->I_off_n + pWidth*dt->I_off_p;
 }
 
+int factorial(int n, int m)
+{
+	int fa = m, i;
+	for (i=m+1; i<=n; i++)
+		fa *=i;
+	return fa;
+}
 
-double simplified_nmos_leakage(
+int combination(int n, int m)
+{
+  int ret;
+  ret = factorial(n, m+1) / factorial(n - m);
+  return ret;
+}
+
+double simplified_nmos_Isat(
     double nwidth,
     bool _is_dram,
     bool _is_cell,
-    bool _is_wl_tr)
+    bool _is_wl_tr,
+    bool _is_sleep_tx)
 {
-  TechnologyParameter::DeviceType * dt;
+  /*TechnologyParameter::*/DeviceType * dt;
 
   if ((!_is_dram)&&(_is_cell))
   { //SRAM cell access transistor
@@ -408,6 +451,67 @@ double simplified_nmos_leakage(
   else if ((_is_dram)&&(_is_wl_tr))
   { //DRAM wordline transistor
     dt = &(g_tp.dram_wl);
+  }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
+  }
+  else
+  { //DRAM or SRAM all other transistors
+    dt = &(g_tp.peri_global);
+  }
+  return nwidth * dt->I_on_n;
+}
+
+double simplified_pmos_Isat(
+    double pwidth,
+    bool _is_dram,
+    bool _is_cell,
+    bool _is_wl_tr,
+    bool _is_sleep_tx)
+{
+  /*TechnologyParameter::*/DeviceType * dt;
+
+  if ((!_is_dram)&&(_is_cell))
+  { //SRAM cell access transistor
+    dt = &(g_tp.sram_cell);
+  }
+  else if ((_is_dram)&&(_is_wl_tr))
+  { //DRAM wordline transistor
+    dt = &(g_tp.dram_wl);
+  }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
+  }
+  else
+  { //DRAM or SRAM all other transistors
+    dt = &(g_tp.peri_global);
+  }
+  return pwidth * dt->I_on_n/dt->n_to_p_eff_curr_drv_ratio;
+}
+
+
+double simplified_nmos_leakage(
+    double nwidth,
+    bool _is_dram,
+    bool _is_cell,
+    bool _is_wl_tr,
+    bool _is_sleep_tx)
+{
+  /*TechnologyParameter::*/DeviceType * dt;
+
+  if ((!_is_dram)&&(_is_cell))
+  { //SRAM cell access transistor
+    dt = &(g_tp.sram_cell);
+  }
+  else if ((_is_dram)&&(_is_wl_tr))
+  { //DRAM wordline transistor
+    dt = &(g_tp.dram_wl);
+  }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
   }
   else
   { //DRAM or SRAM all other transistors
@@ -416,14 +520,14 @@ double simplified_nmos_leakage(
   return nwidth * dt->I_off_n;
 }
 
-
 double simplified_pmos_leakage(
     double pwidth,
     bool _is_dram,
     bool _is_cell,
-    bool _is_wl_tr)
+    bool _is_wl_tr,
+    bool _is_sleep_tx)
 {
-  TechnologyParameter::DeviceType * dt;
+  /*TechnologyParameter::*/DeviceType * dt;
 
   if ((!_is_dram)&&(_is_cell))
   { //SRAM cell access transistor
@@ -433,6 +537,10 @@ double simplified_pmos_leakage(
   { //DRAM wordline transistor
     dt = &(g_tp.dram_wl);
   }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
+  }
   else
   { //DRAM or SRAM all other transistors
     dt = &(g_tp.peri_global);
@@ -440,5 +548,452 @@ double simplified_pmos_leakage(
   return pwidth * dt->I_off_p;
 }
 
+double cmos_Ig_n(
+    double nWidth,
+    bool _is_dram,
+    bool _is_cell,
+    bool _is_wl_tr,
+    bool _is_sleep_tx)
+{
+  /*TechnologyParameter::*/DeviceType * dt;
+
+  if ((!_is_dram)&&(_is_cell))
+  { //SRAM cell access transistor
+    dt = &(g_tp.sram_cell);
+  }
+  else if ((_is_dram)&&(_is_wl_tr))
+  { //DRAM wordline transistor
+    dt = &(g_tp.dram_wl);
+  }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
+  }
+  else
+  { //DRAM or SRAM all other transistors
+    dt = &(g_tp.peri_global);
+  }
+  return nWidth*dt->I_g_on_n;
+}
+
+double cmos_Ig_p(
+    double pWidth,
+    bool _is_dram,
+    bool _is_cell,
+    bool _is_wl_tr,
+    bool _is_sleep_tx)
+{
+  /*TechnologyParameter::*/DeviceType * dt;
+
+  if ((!_is_dram)&&(_is_cell))
+  { //SRAM cell access transistor
+    dt = &(g_tp.sram_cell);
+  }
+  else if ((_is_dram)&&(_is_wl_tr))
+  { //DRAM wordline transistor
+    dt = &(g_tp.dram_wl);
+  }
+  else if (_is_sleep_tx)
+  {
+    dt = &g_tp.sleep_tx;  // Sleep transistor
+  }
+  else
+  { //DRAM or SRAM all other transistors
+    dt = &(g_tp.peri_global);
+  }
+  return pWidth*dt->I_g_on_p;
+}
+
+double cmos_Isub_leakage(
+    double nWidth,
+    double pWidth,
+    int    fanin,
+    enum Gate_type g_type,
+    bool _is_dram,
+    bool _is_cell,
+    bool _is_wl_tr,
+    bool _is_sleep_tx,
+    enum Half_net_topology topo)
+{
+	assert (fanin>=1);
+	double nmos_leak = simplified_nmos_leakage(nWidth, _is_dram, _is_cell, _is_wl_tr, _is_sleep_tx);
+	double pmos_leak = simplified_pmos_leakage(pWidth, _is_dram, _is_cell, _is_wl_tr, _is_sleep_tx);
+    double Isub=0;
+    int    num_states;
+    int    num_off_tx;
+
+    num_states = int(pow(2.0, fanin));
+
+    switch (g_type)
+    {
+    case nmos:
+    	if (fanin==1)
+    	{
+    		Isub = nmos_leak/num_states;
+    	}
+    	else
+    	{
+    		if (topo==parallel)
+    		{
+    			Isub=nmos_leak*fanin/num_states; //only when all tx are off, leakage power is non-zero. The possibility of this state is 1/num_states
+    		}
+    		else
+    		{
+    			for (num_off_tx=1; num_off_tx<=fanin; num_off_tx++) //when num_off_tx ==0 there is no leakage power
+    			{
+    				//Isub += nmos_leak*pow(UNI_LEAK_STACK_FACTOR,(num_off_tx-1))*(factorial(fanin)/(factorial(fanin, num_off_tx)*factorial(num_off_tx)));
+    				Isub += nmos_leak*pow(UNI_LEAK_STACK_FACTOR,(num_off_tx-1))*combination(fanin, num_off_tx);
+    			}
+    			Isub /=num_states;
+    		}
+
+    	}
+    	break;
+    case pmos:
+    	if (fanin==1)
+    	{
+    		Isub = pmos_leak/num_states;
+    	}
+    	else
+    	{
+    		if (topo==parallel)
+    		{
+    			Isub=pmos_leak*fanin/num_states; //only when all tx are off, leakage power is non-zero. The possibility of this state is 1/num_states
+    		}
+    		else
+    		{
+    			for (num_off_tx=1; num_off_tx<=fanin; num_off_tx++) //when num_off_tx ==0 there is no leakage power
+    			{
+    				//Isub += pmos_leak*pow(UNI_LEAK_STACK_FACTOR,(num_off_tx-1))*(factorial(fanin)/(factorial(fanin, num_off_tx)*factorial(num_off_tx)));
+    				Isub += pmos_leak*pow(UNI_LEAK_STACK_FACTOR,(num_off_tx-1))*combination(fanin, num_off_tx);
+    			}
+    			Isub /=num_states;
+    		}
+
+    	}
+    	break;
+    case inv:
+    	Isub = (nmos_leak + pmos_leak)/2;
+    	break;
+    case nand:
+    	Isub += fanin*pmos_leak;//the pullup network
+    	for (num_off_tx=1; num_off_tx<=fanin; num_off_tx++) // the pulldown network
+    	{
+    		//Isub += nmos_leak*pow(UNI_LEAK_STACK_FACTOR,(num_off_tx-1))*(factorial(fanin)/(factorial(fanin, num_off_tx)*factorial(num_off_tx)));
+            Isub += nmos_leak*pow(UNI_LEAK_STACK_FACTOR,(num_off_tx-1))*combination(fanin, num_off_tx);
+    	}
+    	Isub /=num_states;
+    	break;
+    case nor:
+    	for (num_off_tx=1; num_off_tx<=fanin; num_off_tx++) // the pullup network
+    	{
+    		//Isub += pmos_leak*pow(UNI_LEAK_STACK_FACTOR,(num_off_tx-1))*(factorial(fanin)/(factorial(fanin, num_off_tx)*factorial(num_off_tx)));
+    		Isub += pmos_leak*pow(UNI_LEAK_STACK_FACTOR,(num_off_tx-1))*combination(fanin, num_off_tx);
+    	}
+    	Isub += fanin*nmos_leak;//the pulldown network
+    	Isub /=num_states;
+    	break;
+    case tri:
+    	Isub += (nmos_leak + pmos_leak)/2;//enabled
+    	Isub += nmos_leak*UNI_LEAK_STACK_FACTOR; //disabled upper bound of leakage power
+    	Isub /=2;
+    	break;
+    case tg:
+    	Isub = (nmos_leak + pmos_leak)/2;
+    	break;
+    default:
+    	assert(0);
+    	break;
+	  }
+
+    return Isub;
+}
 
 
+double cmos_Ig_leakage(
+    double nWidth,
+    double pWidth,
+    int    fanin,
+    enum Gate_type g_type,
+    bool _is_dram,
+    bool _is_cell,
+    bool _is_wl_tr,
+    bool _is_sleep_tx,
+    enum Half_net_topology topo)
+{
+	assert (fanin>=1);
+		double nmos_leak = cmos_Ig_n(nWidth, _is_dram, _is_cell, _is_wl_tr, _is_sleep_tx);
+		double pmos_leak = cmos_Ig_p(pWidth, _is_dram, _is_cell, _is_wl_tr, _is_sleep_tx);
+	    double Ig_on=0;
+	    int    num_states;
+	    int    num_on_tx;
+
+	    num_states = int(pow(2.0, fanin));
+
+	    switch (g_type)
+	    {
+	    case nmos:
+	    	if (fanin==1)
+	    	{
+	    		Ig_on = nmos_leak/num_states;
+	    	}
+	    	else
+	    	{
+	    		if (topo==parallel)
+	    		{
+	    	    	for (num_on_tx=1; num_on_tx<=fanin; num_on_tx++)
+	    	        {
+	    	    		Ig_on += nmos_leak*combination(fanin, num_on_tx)*num_on_tx;
+	    	    	}
+	    		}
+	    		else
+	    		{
+	    			Ig_on += nmos_leak * fanin;//pull down network when all TXs are on.
+	    		    //num_on_tx is the number of on tx
+	    			for (num_on_tx=1; num_on_tx<fanin; num_on_tx++)//when num_on_tx=[1,n-1]
+	    			{
+	    				Ig_on += nmos_leak*combination(fanin, num_on_tx)*num_on_tx/2;//TODO: this is a approximation now, a precise computation will be very complicated.
+	    			}
+	    			Ig_on /=num_states;
+	    		}
+	    	}
+	    	break;
+	    case pmos:
+	    	if (fanin==1)
+	    	{
+	    		Ig_on = pmos_leak/num_states;
+	    	}
+	    	else
+	    	{
+	    		if (topo==parallel)
+    		    {
+    	    	  for (num_on_tx=1; num_on_tx<=fanin; num_on_tx++)
+    	          {
+    	    		  Ig_on += pmos_leak*combination(fanin, num_on_tx)*num_on_tx;
+    	    	  }
+    		    }
+    		    else
+    		    {
+    			  Ig_on += pmos_leak * fanin;//pull down network when all TXs are on.
+    		      //num_on_tx is the number of on tx
+    			  for (num_on_tx=1; num_on_tx<fanin; num_on_tx++)//when num_on_tx=[1,n-1]
+    			  {
+    				  Ig_on += pmos_leak*combination(fanin, num_on_tx)*num_on_tx/2;//TODO: this is a approximation now, a precise computation will be very complicated.
+    			  }
+	    		  Ig_on /=num_states;
+	    	    }
+	    	}
+	    	break;
+
+	    case inv:
+	    	Ig_on = (nmos_leak + pmos_leak)/2;
+	    	break;
+	    case nand:
+	    	//pull up network
+	    	for (num_on_tx=1; num_on_tx<=fanin; num_on_tx++)//when num_on_tx=[1,n]
+	        {
+	    		Ig_on += pmos_leak*combination(fanin, num_on_tx)*num_on_tx;
+	    	}
+
+	    	//pull down network
+	    	Ig_on += nmos_leak * fanin;//pull down network when all TXs are on.
+	    	//num_on_tx is the number of on tx
+	    	for (num_on_tx=1; num_on_tx<fanin; num_on_tx++)//when num_on_tx=[1,n-1]
+	    	{
+	    		Ig_on += nmos_leak*combination(fanin, num_on_tx)*num_on_tx/2;//TODO: this is a approximation now, a precise computation will be very complicated.
+	    	}
+	    	Ig_on /=num_states;
+	    	break;
+	    case nor:
+	    	// num_on_tx is the number of on tx in pull up network
+	    	Ig_on += pmos_leak * fanin;//pull up network when all TXs are on.
+	    	for (num_on_tx=1; num_on_tx<fanin; num_on_tx++)
+	    	{
+	    		Ig_on += pmos_leak*combination(fanin, num_on_tx)*num_on_tx/2;
+
+	    	}
+	    	//pull down network
+	    	for (num_on_tx=1; num_on_tx<=fanin; num_on_tx++)//when num_on_tx=[1,n]
+	        {
+	    		Ig_on += nmos_leak*combination(fanin, num_on_tx)*num_on_tx;
+	    	}
+	    	Ig_on /=num_states;
+	    	break;
+	    case tri:
+	    	Ig_on += (2*nmos_leak + 2*pmos_leak)/2;//enabled
+	    	Ig_on += (nmos_leak + pmos_leak)/2; //disabled upper bound of leakage power
+	    	Ig_on /=2;
+	    	break;
+	    case tg:
+	    	Ig_on = (nmos_leak + pmos_leak)/2;
+	    	break;
+	    default:
+	    	assert(0);
+	    	break;
+		  }
+
+	    return Ig_on;
+}
+
+double shortcircuit_simple(
+    double vt,
+    double velocity_index,
+    double c_in,
+    double c_out,
+    double w_nmos,
+    double w_pmos,
+    double i_on_n,
+    double i_on_p,
+    double i_on_n_in,
+    double i_on_p_in,
+    double vdd)
+{
+
+	double p_short_circuit, p_short_circuit_discharge, p_short_circuit_charge, p_short_circuit_discharge_low, /*p_short_circuit_discharge_high,*/ p_short_circuit_charge_low /*,p_short_circuit_charge_high*/; //this is actually energy
+	double fo_n, fo_p, fanout, beta_ratio, vt_to_vdd_ratio;
+
+	fo_n	= i_on_n/i_on_n_in;
+	fo_p	= i_on_p/i_on_p_in;
+	fanout	= c_out/c_in;
+	beta_ratio = i_on_p/i_on_n;
+	vt_to_vdd_ratio = vt/vdd;
+
+	//p_short_circuit_discharge_low 	= 10/3*(pow(0.5-vt_to_vdd_ratio,3.0)/pow(velocity_index,2.0)/pow(2.0,3*vt_to_vdd_ratio*vt_to_vdd_ratio))*c_in*vdd*vdd*fo_p*fo_p/fanout/beta_ratio;
+	p_short_circuit_discharge_low 	= 10/3*(pow(((vdd-vt)-vt_to_vdd_ratio),3.0)/pow(velocity_index,2.0)/pow(2.0,3*vt_to_vdd_ratio*vt_to_vdd_ratio))*c_in*vdd*vdd*fo_p*fo_p/fanout/beta_ratio;
+	p_short_circuit_charge_low 		= 10/3*(pow(((vdd-vt)-vt_to_vdd_ratio),3.0)/pow(velocity_index,2.0)/pow(2.0,3*vt_to_vdd_ratio*vt_to_vdd_ratio))*c_in*vdd*vdd*fo_n*fo_n/fanout*beta_ratio;
+//	double t1, t2, t3, t4, t5;
+//	t1=pow(((vdd-vt)-vt_to_vdd_ratio),3);
+//	t2=pow(velocity_index,2.0);
+//	t3=pow(2.0,3*vt_to_vdd_ratio*vt_to_vdd_ratio);
+//	t4=t1/t2/t3;
+//	cout <<t1<<"t1\n"<<t2<<"t2\n"<<t3<<"t3\n"<<t4<<"t4\n"<<fanout<<endl;
+
+	///p_short_circuit_discharge_high 	= pow(((vdd-vt)-vt_to_vdd_ratio),1.5)*c_in*vdd*vdd*fo_p/10/pow(2, 3*vt_to_vdd_ratio+2*velocity_index);
+	///p_short_circuit_charge_high 	= pow(((vdd-vt)-vt_to_vdd_ratio),1.5)*c_in*vdd*vdd*fo_n/10/pow(2, 3*vt_to_vdd_ratio+2*velocity_index);
+
+//	t1=pow(((vdd-vt)-vt_to_vdd_ratio),1.5);
+//	t2=pow(2, 3*vt_to_vdd_ratio+2*velocity_index);
+//	t3=t1/t2;
+//	cout <<t1<<"t1\n"<<t2<<"t2\n"<<t3<<"t3\n"<<t4<<"t4\n"<<fanout<<endl;
+//	p_short_circuit_discharge = 1.0/(1.0/p_short_circuit_discharge_low + 1.0/p_short_circuit_discharge_high);
+//	p_short_circuit_charge = 1/(1/p_short_circuit_charge_low + 1/p_short_circuit_charge_high); //harmmoic mean cannot be applied simple formulas.
+
+	p_short_circuit_discharge = p_short_circuit_discharge_low;
+	p_short_circuit_charge = p_short_circuit_charge_low;
+	p_short_circuit = (p_short_circuit_discharge + p_short_circuit_charge)/2;
+
+  return (p_short_circuit);
+}
+
+double shortcircuit(
+    double vt,
+    double velocity_index,
+    double c_in,
+    double c_out,
+    double w_nmos,
+    double w_pmos,
+    double i_on_n,
+    double i_on_p,
+    double i_on_n_in,
+    double i_on_p_in,
+    double vdd)
+{
+
+	double p_short_circuit=0, p_short_circuit_discharge=0;//, p_short_circuit_charge, p_short_circuit_discharge_low, p_short_circuit_discharge_high, p_short_circuit_charge_low, p_short_circuit_charge_high; //this is actually energy
+	double /*fo_n,*/ fo_p, fanout, beta_ratio /*,vt_to_vdd_ratio*/;
+	double f_alpha, k_v, e, g_v_alpha, h_v_alpha;
+
+	///fo_n		= i_on_n/i_on_n_in;
+	fo_p		= i_on_p/i_on_p_in;
+	fanout		= 1;
+	beta_ratio 	= i_on_p/i_on_n;
+	///vt_to_vdd_ratio = vt/vdd;
+	e 			= 	2.71828;
+	f_alpha		=	1/(velocity_index+2) -velocity_index/(2*(velocity_index+3)) +velocity_index/(velocity_index+4)*(velocity_index/2-1);
+	k_v			=	0.9/0.8+(vdd-vt)/0.8*log(10*(vdd-vt)/e);
+	g_v_alpha	=	(velocity_index + 1)*pow((1-velocity_index),velocity_index)*pow((1-velocity_index),velocity_index/2)/f_alpha/pow((1-velocity_index-velocity_index),(velocity_index/2+velocity_index+2));
+	h_v_alpha	=   pow(2, velocity_index)*(velocity_index+1)*pow((1-velocity_index),velocity_index)/pow((1-velocity_index-velocity_index),(velocity_index+1));
+
+	//p_short_circuit_discharge_low 	= 10/3*(pow(0.5-vt_to_vdd_ratio,3.0)/pow(velocity_index,2.0)/pow(2.0,3*vt_to_vdd_ratio*vt_to_vdd_ratio))*c_in*vdd*vdd*fo_p*fo_p/fanout/beta_ratio;
+//	p_short_circuit_discharge_low 	= 10/3*(pow(((vdd-vt)-vt_to_vdd_ratio),3.0)/pow(velocity_index,2.0)/pow(2.0,3*vt_to_vdd_ratio*vt_to_vdd_ratio))*c_in*vdd*vdd*fo_p*fo_p/fanout/beta_ratio;
+//	p_short_circuit_charge_low 		= 10/3*(pow(((vdd-vt)-vt_to_vdd_ratio),3.0)/pow(velocity_index,2.0)/pow(2.0,3*vt_to_vdd_ratio*vt_to_vdd_ratio))*c_in*vdd*vdd*fo_n*fo_n/fanout*beta_ratio;
+//	double t1, t2, t3, t4, t5;
+//	t1=pow(((vdd-vt)-vt_to_vdd_ratio),3);
+//	t2=pow(velocity_index,2.0);
+//	t3=pow(2.0,3*vt_to_vdd_ratio*vt_to_vdd_ratio);
+//	t4=t1/t2/t3;
+//
+//	cout <<t1<<"t1\n"<<t2<<"t2\n"<<t3<<"t3\n"<<t4<<"t4\n"<<fanout<<endl;
+//
+//
+//	p_short_circuit_discharge_high 	= pow(((vdd-vt)-vt_to_vdd_ratio),1.5)*c_in*vdd*vdd*fo_p/10/pow(2, 3*vt_to_vdd_ratio+2*velocity_index);
+//	p_short_circuit_charge_high 	= pow(((vdd-vt)-vt_to_vdd_ratio),1.5)*c_in*vdd*vdd*fo_n/10/pow(2, 3*vt_to_vdd_ratio+2*velocity_index);
+//
+//	p_short_circuit_discharge = 1.0/(1.0/p_short_circuit_discharge_low + 1.0/p_short_circuit_discharge_high);
+//	p_short_circuit_charge = 1/(1/p_short_circuit_charge_low + 1/p_short_circuit_charge_high);
+//
+//	p_short_circuit = (p_short_circuit_discharge + p_short_circuit_charge)/2;
+//
+//	p_short_circuit = p_short_circuit_discharge;
+
+	p_short_circuit_discharge = k_v*vdd*vdd*c_in*fo_p*fo_p/((vdd-vt)*g_v_alpha*fanout*beta_ratio/2/k_v + h_v_alpha*fo_p);
+  return (p_short_circuit);
+}
+
+
+//ali
+double wire_resistance(double resistivity, double wire_width, double wire_thickness,
+    double barrier_thickness, double dishing_thickness, double alpha_scatter)
+{
+  double resistance;
+  resistance = alpha_scatter * resistivity /((wire_thickness - barrier_thickness - dishing_thickness)*(wire_width - 2 * barrier_thickness));
+  return(resistance);
+}
+
+double wire_capacitance(double wire_width, double wire_thickness, double wire_spacing,
+    double ild_thickness, double miller_value, double horiz_dielectric_constant,
+    double vert_dielectric_constant, double fringe_cap)
+{
+  double vertical_cap, sidewall_cap, total_cap;
+  vertical_cap = 2 * PERMITTIVITY_FREE_SPACE * vert_dielectric_constant * wire_width / ild_thickness;
+  sidewall_cap = 2 * PERMITTIVITY_FREE_SPACE * miller_value * horiz_dielectric_constant * wire_thickness / wire_spacing;
+  total_cap = vertical_cap + sidewall_cap + fringe_cap;
+  return(total_cap);
+}
+
+//CACTI3DD TSV
+double tsv_resistance(double resistivity, double tsv_len, double tsv_diam, double tsv_contact_resistance)
+{
+	double resistance;
+	resistance = resistivity * tsv_len / (3.1416 * (tsv_diam/2) * (tsv_diam/2)) + tsv_contact_resistance;
+	return(resistance);
+}
+
+double tsv_capacitance(double tsv_len, double tsv_diam, double tsv_pitch, double dielec_thickness, double liner_dielectric_constant, double depletion_width)
+{
+	double self_cap, liner_cap, depletion_cap, lateral_coupling_cap, diagonal_coupling_cap, total_cap;
+	double diagonal_coupling_constant, lateral_coupling_constant;
+	const double e_si = PERMITTIVITY_FREE_SPACE * 11.9, PI = 3.1416;
+	lateral_coupling_constant = 4.1;
+	diagonal_coupling_constant = 5.3;
+	//depletion_width = 0.6; // um
+	liner_cap = 2 * PI * PERMITTIVITY_FREE_SPACE * liner_dielectric_constant * tsv_len / log(1 + dielec_thickness / (tsv_diam/2));
+	depletion_cap = 2 * PI * e_si *tsv_len / log(1 + depletion_width / (dielec_thickness + tsv_diam/2));
+	//self_cap = ( 1 / (1/liner_cap + 1/depletion_cap) + liner_cap ) / 2;
+	self_cap = 1 / (1/liner_cap + 1/depletion_cap);
+	if (g_ip->print_detail_debug)
+	{
+		cout<<"TSV ox cap: "<<liner_cap*1e15<<" fF"<<endl;
+		cout<<"TSV self cap: "<<self_cap*1e15<<" fF"<<endl;
+	}
+	lateral_coupling_cap = 0.4 *  (0.225 * log(0.97 * tsv_len / tsv_diam) + 0.53) * e_si / (tsv_pitch - tsv_diam) * PI * tsv_diam * tsv_len;
+	diagonal_coupling_cap = 0.4 *  (0.225 * log(0.97 * tsv_len / tsv_diam) + 0.53) * e_si / (1.414 * tsv_pitch - tsv_diam) * PI * tsv_diam * tsv_len;
+	total_cap = self_cap + lateral_coupling_constant * lateral_coupling_cap + diagonal_coupling_constant * diagonal_coupling_cap;
+	return(total_cap);
+}
+
+double tsv_area(double tsv_pitch)
+{
+	return(pow(tsv_pitch,2));
+}
+// end ali
