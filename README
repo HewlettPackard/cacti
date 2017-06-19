@@ -56,6 +56,10 @@ The following is the list of features supported by the tool.
 Version 7.0 is derived from 6.5 and merged with CACTI 3D. 
 It has many new additions apart from code refinements and 
 bug fixes: new IO model, 3D memory model, and power gating models.
+Ref: CACTI-IO: CACTI With OFF-chip Power-Area-Timing Models
+     MemCAD: An Interconnect Exploratory Tool for Innovative Memories Beyond DDR4
+     CACTI-3DD: Architecture-level modeling for 3D die-stacked DRAM main memory
+
 --------------------------------------------------------------------------
 Version 6.5 has a new c++ code base and includes numerous bug fixes.
 CACTI 5.3 and 6.0 activate an entire row of mats to read/write a single
@@ -68,14 +72,13 @@ How to use the tool?
 Prior versions of CACTI take input parameters such as cache
 size and technology node as a set of command line arguments. 
 To avoid a long list of command line arguments, 
-CACTI 6.5 lets users specify their cache model in a more 
+CACTI 6.5 & & let users specify their cache model in a more 
 detailed manner by using a config file (cache.cfg).
 
 -> define the cache model using cache.cfg
 -> run the "cacti" binary <./cacti -infile cache.cfg>
 
-CACTI6.5 also provides a command line interface similar to earlier versions
-of CACTI. The command line interface can be used as
+CACTI also provides a command line interface similar to earlier versions. The command line interface can be used as
 
 ./cacti  cache_size line_size associativity rw_ports excl_read_ports excl_write_ports 
   single_ended_read_ports search_ports banks tech_node output_width specific_tag tag_width
@@ -89,18 +92,31 @@ of CACTI. The command line interface can be used as
   INTERNAL_PREFETCH_WIDTH_in force_wiretype wiretype force_config ndwl ndbl nspd ndcm 
   ndsam1 ndsam2 ecc
 
-For complete documentation of the tool, please refer CACTI-5.3 and 6.0
-technical reports and the following paper,
-"Optimizing NUCA Organizations and Wiring Alternatives for 
-Large Caches With CACTI 6.0", that appears in MICRO 2007.
+For complete documentation of the tool, please refer
+to the following publications and reports.
+
+CACTI-5.3 & 6 reports - Details on Meory/cache organizations and tradeoffs.
+
+Latency/Energy tradeoffs for large caches and NUCA design:
+  "Optimizing NUCA Organizations and Wiring Alternatives for Large Caches With CACTI 6.0", that appears in MICRO 2007.
+
+Memory IO design:  CACTI-IO: CACTI With OFF-chip Power-Area-Timing Models,
+     MemCAD: An Interconnect Exploratory Tool for Innovative Memories Beyond DDR4
+     CACTI-IO Technical Report - http://www.hpl.hp.com/techreports/2013/HPL-2013-79.pdf
+
+3D model:
+     CACTI-3DD: Architecture-level modeling for 3D die-stacked DRAM main memory
 
 We are still improving the tool and refining the code. If you
 have any comments, questions, or suggestions please write to
 us.
 
-Naveen Muralimanohar             Jung Ho Ahn      
-naveen.muralimanohar@hpe.com      gajh@snu.ac.kr  
+Naveen Muralimanohar             
+naveen.muralimanohar@hpe.com    
 
+Ali Shafiee 
+shafiee@cs.utah.edu
 
-
+Vaishnav Srinivas
+vaishnav.srinivas@gmail.com
 
