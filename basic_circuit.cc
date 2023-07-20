@@ -899,20 +899,20 @@ double shortcircuit(
     double vdd)
 {
 
-	double p_short_circuit=0, p_short_circuit_discharge=0;//, p_short_circuit_charge, p_short_circuit_discharge_low, p_short_circuit_discharge_high, p_short_circuit_charge_low, p_short_circuit_charge_high; //this is actually energy
-	double /*fo_n,*/ fo_p, fanout, beta_ratio /*,vt_to_vdd_ratio*/;
-	double f_alpha, k_v, e, g_v_alpha, h_v_alpha;
+	double p_short_circuit=0;//, p_short_circuit_discharge=0, p_short_circuit_charge, p_short_circuit_discharge_low, p_short_circuit_discharge_high, p_short_circuit_charge_low, p_short_circuit_charge_high; //this is actually energy
+	//double /*fo_n,*/ fo_p, fanout, beta_ratio /*,vt_to_vdd_ratio*/;
+	//double f_alpha, k_v, e, g_v_alpha, h_v_alpha;
 
 	///fo_n		= i_on_n/i_on_n_in;
-	fo_p		= i_on_p/i_on_p_in;
-	fanout		= 1;
-	beta_ratio 	= i_on_p/i_on_n;
+	//fo_p		= i_on_p/i_on_p_in;
+	//fanout		= 1;
+	//beta_ratio 	= i_on_p/i_on_n;
 	///vt_to_vdd_ratio = vt/vdd;
-	e 			= 	2.71828;
-	f_alpha		=	1/(velocity_index+2) -velocity_index/(2*(velocity_index+3)) +velocity_index/(velocity_index+4)*(velocity_index/2-1);
-	k_v			=	0.9/0.8+(vdd-vt)/0.8*log(10*(vdd-vt)/e);
-	g_v_alpha	=	(velocity_index + 1)*pow((1-velocity_index),velocity_index)*pow((1-velocity_index),velocity_index/2)/f_alpha/pow((1-velocity_index-velocity_index),(velocity_index/2+velocity_index+2));
-	h_v_alpha	=   pow(2, velocity_index)*(velocity_index+1)*pow((1-velocity_index),velocity_index)/pow((1-velocity_index-velocity_index),(velocity_index+1));
+	//e 			= 	2.71828;
+	//f_alpha		=	1/(velocity_index+2) -velocity_index/(2*(velocity_index+3)) +velocity_index/(velocity_index+4)*(velocity_index/2-1);
+	//k_v			=	0.9/0.8+(vdd-vt)/0.8*log(10*(vdd-vt)/e);
+	//g_v_alpha	=	(velocity_index + 1)*pow((1-velocity_index),velocity_index)*pow((1-velocity_index),velocity_index/2)/f_alpha/pow((1-velocity_index-velocity_index),(velocity_index/2+velocity_index+2));
+	//h_v_alpha	=   pow(2, velocity_index)*(velocity_index+1)*pow((1-velocity_index),velocity_index)/pow((1-velocity_index-velocity_index),(velocity_index+1));
 
 	//p_short_circuit_discharge_low 	= 10/3*(pow(0.5-vt_to_vdd_ratio,3.0)/pow(velocity_index,2.0)/pow(2.0,3*vt_to_vdd_ratio*vt_to_vdd_ratio))*c_in*vdd*vdd*fo_p*fo_p/fanout/beta_ratio;
 //	p_short_circuit_discharge_low 	= 10/3*(pow(((vdd-vt)-vt_to_vdd_ratio),3.0)/pow(velocity_index,2.0)/pow(2.0,3*vt_to_vdd_ratio*vt_to_vdd_ratio))*c_in*vdd*vdd*fo_p*fo_p/fanout/beta_ratio;
@@ -936,7 +936,7 @@ double shortcircuit(
 //
 //	p_short_circuit = p_short_circuit_discharge;
 
-	p_short_circuit_discharge = k_v*vdd*vdd*c_in*fo_p*fo_p/((vdd-vt)*g_v_alpha*fanout*beta_ratio/2/k_v + h_v_alpha*fo_p);
+	//p_short_circuit_discharge = k_v*vdd*vdd*c_in*fo_p*fo_p/((vdd-vt)*g_v_alpha*fanout*beta_ratio/2/k_v + h_v_alpha*fo_p);
   return (p_short_circuit);
 }
 
