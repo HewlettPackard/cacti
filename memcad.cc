@@ -163,7 +163,7 @@ void find_all_channels(MemCadParameters * memcad_params)
 					}
 				}
 				
-				if( (current_dimm_model== JUST_RDIMM) || (current_dimm_model== ALL)
+				if( ((current_dimm_model== JUST_RDIMM) || (current_dimm_model== ALL))
 				&&  ((d1==0) || (MemoryParameters::cost[current_io_type][1][d1-1]<INF))
 				&&  ((d2==0) || (MemoryParameters::cost[current_io_type][1][d2-1]<INF))
 				&&  ((d3==0) || (MemoryParameters::cost[current_io_type][1][d3-1]<INF)) )				
@@ -200,7 +200,7 @@ void find_all_channels(MemCadParameters * memcad_params)
 					}
 				}
 				
-				if( (current_dimm_model== JUST_UDIMM) || (current_dimm_model== ALL)
+				if( ((current_dimm_model== JUST_UDIMM) || (current_dimm_model== ALL))
 				&&  ((d1==0) || (MemoryParameters::cost[current_io_type][0][d1-1]<INF))
 				&&  ((d2==0) || (MemoryParameters::cost[current_io_type][0][d2-1]<INF))
 				&&  ((d3==0) || (MemoryParameters::cost[current_io_type][0][d3-1]<INF)) )				
@@ -233,7 +233,6 @@ void find_all_channels(MemCadParameters * memcad_params)
 						}
 					}
 				}
-								
 			}
 		}
 	}
@@ -391,9 +390,13 @@ void find_all_bobs(MemCadParameters * memcad_params)
 	else if(memcad_params->same_bw_in_bob)
 	{
 		sort(memcad_all_channels->begin(), memcad_all_channels->end(), compare_channels_bw); 
-		vector<int> start_index; start_index.push_back(0);
+		vector<int> start_index; 
 		vector<int> end_index;
-		int last_bw =(*memcad_all_channels)[0]->bandwidth;
+		int last_bw = 0;
+		if(memcad_all_channels->size() > 0){
+			start_index.push_back(0);
+			last_bw =(*memcad_all_channels)[0]->bandwidth;
+		}
 		for(unsigned int i=0;i< memcad_all_channels->size();i++)
 		{
 			if(last_bw!=(*memcad_all_channels)[i]->bandwidth)

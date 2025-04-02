@@ -268,9 +268,9 @@ int IOTechParam::frequnecy_index(Mem_IO_type type)
 
 IOTechParam::IOTechParam(InputParameter * g_ip) 
 {
-  num_mem_ca  = g_ip->num_mem_dq * (g_ip->num_dq/g_ip->mem_data_width); 
-  num_mem_clk =  g_ip->num_mem_dq *
-                (g_ip->num_dq/g_ip->mem_data_width)/(g_ip->num_clk/2); 
+  num_mem_ca  = g_ip->num_mem_dq * (int)(g_ip->num_dq/g_ip->mem_data_width); 
+  num_mem_clk =  (int)(g_ip->num_mem_dq *
+                (g_ip->num_dq/g_ip->mem_data_width)/(g_ip->num_clk/2)); 
 
 
   if (g_ip->io_type == LPDDR2) { //LPDDR
@@ -354,16 +354,16 @@ IOTechParam::IOTechParam(InputParameter * g_ip)
       * of experiments method shown in the technical report (), in Chapter 2.2. */
 
     k_noise_write_sen = k_noise_write * (1 + 0.2*(r_on/34 - 1) +
-        0.2*(g_ip->num_mem_dq/2 - 1));
+        0.2*(int)(g_ip->num_mem_dq/2 - 1));
     k_noise_read_sen = k_noise_read * (1 + 0.2*(r_on/34 - 1) +
-        0.2*(g_ip->num_mem_dq/2 - 1));
+        0.2*(int)(g_ip->num_mem_dq/2 - 1));
     k_noise_addr_sen = k_noise_addr * (1 + 0.1*(rtt_ca/100 - 1) +
         0.2*(r_on/34 - 1) + 0.2*(num_mem_ca/16 - 1));
 
     t_jitter_setup_sen = t_jitter_setup * (1  + 0.1*(r_on/34 - 1) +
-        0.3*(g_ip->num_mem_dq/2 - 1));
+        0.3*(int)(g_ip->num_mem_dq/2 - 1));
     t_jitter_hold_sen = t_jitter_hold * (1 + 0.1*(r_on/34 - 1) +
-        0.3*(g_ip->num_mem_dq/2 - 1));
+        0.3*(int)(g_ip->num_mem_dq/2 - 1));
     t_jitter_addr_setup_sen = t_jitter_addr_setup * (1 + 0.2*(rtt_ca/100 - 1) +
         0.1*(r_on/34 - 1) + 0.4*(num_mem_ca/16 - 1));
     t_jitter_addr_hold_sen = t_jitter_addr_hold * (1 + 0.2*(rtt_ca/100 - 1) +
@@ -483,17 +483,17 @@ IOTechParam::IOTechParam(InputParameter * g_ip)
       * of experiments method shown in the technical report (), in Chapter 2.2. */
 
      k_noise_write_sen = k_noise_write * (1 + 0.2*(r_on/50 - 1) + 
-         0.2*(g_ip->num_mem_dq/2 - 1));
+         0.2*(int)(g_ip->num_mem_dq/2 - 1));
      k_noise_read_sen = k_noise_read * (1 + 0.2*(r_on/50 - 1) + 
-         0.2*(g_ip->num_mem_dq/2 - 1));
+         0.2*(int)(g_ip->num_mem_dq/2 - 1));
      k_noise_addr_sen = k_noise_addr * (1 + 0.2*(r_on/50 - 1) + 
          0.2*(num_mem_ca/16 - 1));
 
 
      t_jitter_setup_sen = t_jitter_setup * (1  + 0.1*(r_on/50 - 1) + 
-         0.3*(g_ip->num_mem_dq/2 - 1));
+         0.3*(int)(g_ip->num_mem_dq/2 - 1));
      t_jitter_hold_sen = t_jitter_hold * (1 + 0.1*(r_on/50 - 1) + 
-         0.3*(g_ip->num_mem_dq/2 - 1));
+         0.3*(int)(g_ip->num_mem_dq/2 - 1));
      t_jitter_addr_setup_sen = t_jitter_addr_setup * (1 + 0.1*(r_on/50 - 1) + 
          0.4*(num_mem_ca/16 - 1));
      t_jitter_addr_hold_sen = t_jitter_addr_hold * (1 + 0.1*(r_on/50 - 1) + 
@@ -614,11 +614,11 @@ IOTechParam::IOTechParam(InputParameter * g_ip)
 
      k_noise_write_sen = k_noise_write * (1 + 0.1*(rtt1_dq_write/60 - 1) +
          0.2*(rtt2_dq_write/60 - 1) + 0.2*(r_on/34 - 1) +
-         0.2*(g_ip->num_mem_dq/2 - 1));
+         0.2*(int)(g_ip->num_mem_dq/2 - 1));
 
      k_noise_read_sen = k_noise_read * (1 + 0.1*(rtt1_dq_read/60 - 1) +
          0.2*(rtt2_dq_read/60 - 1) + 0.2*(r_on/34 - 1) +
-         0.2*(g_ip->num_mem_dq/2 - 1));
+         0.2*(int)(g_ip->num_mem_dq/2 - 1));
 
      k_noise_addr_sen = k_noise_addr * (1 + 0.1*(rtt_ca/50 - 1) +
          0.2*(r_on/34 - 1) + 0.2*(num_mem_ca/16 - 1));
@@ -626,11 +626,11 @@ IOTechParam::IOTechParam(InputParameter * g_ip)
 
      t_jitter_setup_sen = t_jitter_setup * (1 + 0.2*(rtt1_dq_write/60 - 1) + 
          0.3*(rtt2_dq_write/60 - 1) + 0.1*(r_on/34 - 1) + 
-         0.3*(g_ip->num_mem_dq/2 - 1));
+         0.3*(int)(g_ip->num_mem_dq/2 - 1));
 
      t_jitter_hold_sen = t_jitter_hold * (1 + 0.2*(rtt1_dq_write/60 - 1) + 
          0.3*(rtt2_dq_write/60 - 1) + 
-         0.1*(r_on/34 - 1) + 0.3*(g_ip->num_mem_dq/2 - 1));
+         0.1*(r_on/34 - 1) + 0.3*(int)(g_ip->num_mem_dq/2 - 1));
 
      t_jitter_addr_setup_sen = t_jitter_addr_setup * (1 + 0.2*(rtt_ca/50 - 1) + 
          0.1*(r_on/34 - 1) + 0.4*(num_mem_ca/16 - 1));
@@ -752,11 +752,11 @@ IOTechParam::IOTechParam(InputParameter * g_ip)
 
      k_noise_write_sen = k_noise_write * (1 + 0.1*(rtt1_dq_write/60 - 1) +
          0.2*(rtt2_dq_write/60 - 1) + 0.2*(r_on/34 - 1) +
-         0.2*(g_ip->num_mem_dq/2 - 1));
+         0.2*(int)(g_ip->num_mem_dq/2 - 1));
 
      k_noise_read_sen = k_noise_read * (1 + 0.1*(rtt1_dq_read/60 - 1) +
          0.2*(rtt2_dq_read/60 - 1) + 0.2*(r_on/34 - 1) +
-         0.2*(g_ip->num_mem_dq/2 - 1));
+         0.2*(int)(g_ip->num_mem_dq/2 - 1));
 
      k_noise_addr_sen = k_noise_addr * (1 + 0.1*(rtt_ca/50 - 1) +
          0.2*(r_on/34 - 1) + 0.2*(num_mem_ca/16 - 1));
@@ -764,11 +764,11 @@ IOTechParam::IOTechParam(InputParameter * g_ip)
 
      t_jitter_setup_sen = t_jitter_setup * (1 + 0.2*(rtt1_dq_write/60 - 1) + 
          0.3*(rtt2_dq_write/60 - 1) + 0.1*(r_on/34 - 1) + 
-         0.3*(g_ip->num_mem_dq/2 - 1));
+         0.3*(int)(g_ip->num_mem_dq/2 - 1));
 
      t_jitter_hold_sen = t_jitter_hold * (1 + 0.2*(rtt1_dq_write/60 - 1) + 
          0.3*(rtt2_dq_write/60 - 1) + 
-         0.1*(r_on/34 - 1) + 0.3*(g_ip->num_mem_dq/2 - 1));
+         0.1*(r_on/34 - 1) + 0.3*(int)(g_ip->num_mem_dq/2 - 1));
 
      t_jitter_addr_setup_sen = t_jitter_addr_setup * (1 + 0.2*(rtt_ca/50 - 1) + 
          0.1*(r_on/34 - 1) + 0.4*(num_mem_ca/16 - 1));
@@ -829,6 +829,8 @@ IOTechParam::IOTechParam(InputParameter * g_ip)
      t_soc_hold = 10; 
      t_jitter_setup = 20; 
      t_jitter_hold = 20;
+     t_jitter_addr_setup = 40; //SET THIS VAR TO A DEFAULT NUMBER TO AVOID UNDEFINED BEHAVIOUR. THIS NUMBER IS PROBABLY INCORRECT.
+     t_jitter_addr_hold = 40; //SET THIS VAR TO A DEFAULT NUMBER TO AVOID UNDEFINED BEHAVIOUR. THIS NUMBER IS PROBABLY INCORRECT.
 
      //External IO Configuration Parameters 
 
@@ -874,7 +876,7 @@ IOTechParam::IOTechParam(InputParameter * g_ip)
 
 
    }
-	else
+  else
 	{
 		cout << "Not Yet supported" << endl;
 		exit(1);
@@ -914,8 +916,8 @@ IOTechParam::IOTechParam(InputParameter * g_ip, Mem_IO_type io_type1, int num_me
 						, int num_dq, int connection, int num_loads, double freq) 
 {
   num_mem_ca  = num_mem_dq * (mem_data_width); 
-  num_mem_clk =  num_mem_dq *
-                (num_dq/mem_data_width)/(g_ip->num_clk/2); 
+  num_mem_clk =  (int)(num_mem_dq *
+                (num_dq/mem_data_width)/(g_ip->num_clk/2)); 
 
   io_type = io_type1;
   frequency = freq;
@@ -1004,16 +1006,16 @@ IOTechParam::IOTechParam(InputParameter * g_ip, Mem_IO_type io_type1, int num_me
       * of experiments method shown in the technical report (), in Chapter 2.2. */
 
     k_noise_write_sen = k_noise_write * (1 + 0.2*(r_on/34 - 1) +
-        0.2*(num_mem_dq/2 - 1));
+        0.2*(int)(num_mem_dq/2 - 1));
     k_noise_read_sen = k_noise_read * (1 + 0.2*(r_on/34 - 1) +
-        0.2*(num_mem_dq/2 - 1));
+        0.2*(int)(num_mem_dq/2 - 1));
     k_noise_addr_sen = k_noise_addr * (1 + 0.1*(rtt_ca/100 - 1) +
         0.2*(r_on/34 - 1) + 0.2*(num_mem_ca/16 - 1));
 
     t_jitter_setup_sen = t_jitter_setup * (1  + 0.1*(r_on/34 - 1) +
-        0.3*(num_mem_dq/2 - 1));
+        0.3*(int)(num_mem_dq/2 - 1));
     t_jitter_hold_sen = t_jitter_hold * (1 + 0.1*(r_on/34 - 1) +
-        0.3*(num_mem_dq/2 - 1));
+        0.3*(int)(num_mem_dq/2 - 1));
     t_jitter_addr_setup_sen = t_jitter_addr_setup * (1 + 0.2*(rtt_ca/100 - 1) +
         0.1*(r_on/34 - 1) + 0.4*(num_mem_ca/16 - 1));
     t_jitter_addr_hold_sen = t_jitter_addr_hold * (1 + 0.2*(rtt_ca/100 - 1) +
@@ -1054,7 +1056,7 @@ IOTechParam::IOTechParam(InputParameter * g_ip, Mem_IO_type io_type1, int num_me
 
 
   }
-   else if (io_type == WideIO) { //WIDEIO 
+  else if (io_type == WideIO) { //WIDEIO 
      //Technology Parameters
      vdd_io = 1.2;
      v_sw_clk =  1.2;
@@ -1133,17 +1135,17 @@ IOTechParam::IOTechParam(InputParameter * g_ip, Mem_IO_type io_type1, int num_me
       * of experiments method shown in the technical report (), in Chapter 2.2. */
 
      k_noise_write_sen = k_noise_write * (1 + 0.2*(r_on/50 - 1) + 
-         0.2*(num_mem_dq/2 - 1));
+         0.2*(int)(num_mem_dq/2 - 1));
      k_noise_read_sen = k_noise_read * (1 + 0.2*(r_on/50 - 1) + 
-         0.2*(num_mem_dq/2 - 1));
+         0.2*(int)(num_mem_dq/2 - 1));
      k_noise_addr_sen = k_noise_addr * (1 + 0.2*(r_on/50 - 1) + 
          0.2*(num_mem_ca/16 - 1));
 
 
      t_jitter_setup_sen = t_jitter_setup * (1  + 0.1*(r_on/50 - 1) + 
-         0.3*(num_mem_dq/2 - 1));
+         0.3*(int)(num_mem_dq/2 - 1));
      t_jitter_hold_sen = t_jitter_hold * (1 + 0.1*(r_on/50 - 1) + 
-         0.3*(num_mem_dq/2 - 1));
+         0.3*(int)(num_mem_dq/2 - 1));
      t_jitter_addr_setup_sen = t_jitter_addr_setup * (1 + 0.1*(r_on/50 - 1) + 
          0.4*(num_mem_ca/16 - 1));
      t_jitter_addr_hold_sen = t_jitter_addr_hold * (1 + 0.1*(r_on/50 - 1) + 
@@ -1292,11 +1294,11 @@ IOTechParam::IOTechParam(InputParameter * g_ip, Mem_IO_type io_type1, int num_me
 
      k_noise_write_sen = k_noise_write * (1 + 0.1*(rtt1_dq_write/60 - 1) +
          0.2*(rtt2_dq_write/60 - 1) + 0.2*(r_on/34 - 1) +
-         0.2*(num_mem_dq/2 - 1));
+         0.2*(int)(num_mem_dq/2 - 1));
 
      k_noise_read_sen = k_noise_read * (1 + 0.1*(rtt1_dq_read/60 - 1) +
          0.2*(rtt2_dq_read/60 - 1) + 0.2*(r_on/34 - 1) +
-         0.2*(num_mem_dq/2 - 1));
+         0.2*(int)(num_mem_dq/2 - 1));
 
      k_noise_addr_sen = k_noise_addr * (1 + 0.1*(rtt_ca/50 - 1) +
          0.2*(r_on/34 - 1) + 0.2*(num_mem_ca/16 - 1));
@@ -1304,11 +1306,11 @@ IOTechParam::IOTechParam(InputParameter * g_ip, Mem_IO_type io_type1, int num_me
 
      t_jitter_setup_sen = t_jitter_setup * (1 + 0.2*(rtt1_dq_write/60 - 1) + 
          0.3*(rtt2_dq_write/60 - 1) + 0.1*(r_on/34 - 1) + 
-         0.3*(num_mem_dq/2 - 1));
+         0.3*(int)(num_mem_dq/2 - 1));
 
      t_jitter_hold_sen = t_jitter_hold * (1 + 0.2*(rtt1_dq_write/60 - 1) + 
          0.3*(rtt2_dq_write/60 - 1) + 
-         0.1*(r_on/34 - 1) + 0.3*(num_mem_dq/2 - 1));
+         0.1*(r_on/34 - 1) + 0.3*(int)(num_mem_dq/2 - 1));
 
      t_jitter_addr_setup_sen = t_jitter_addr_setup * (1 + 0.2*(rtt_ca/50 - 1) + 
          0.1*(r_on/34 - 1) + 0.4*(num_mem_ca/16 - 1));
@@ -1347,7 +1349,7 @@ IOTechParam::IOTechParam(InputParameter * g_ip, Mem_IO_type io_type1, int num_me
 
 
    }
-   else if (io_type == DDR4)
+  else if (io_type == DDR4)
    { //Default parameters for DDR4
      // IO Supply voltage (V) 
      vdd_io = 1.2;
@@ -1457,11 +1459,11 @@ IOTechParam::IOTechParam(InputParameter * g_ip, Mem_IO_type io_type1, int num_me
 
      k_noise_write_sen = k_noise_write * (1 + 0.1*(rtt1_dq_write/60 - 1) +
          0.2*(rtt2_dq_write/60 - 1) + 0.2*(r_on/34 - 1) +
-         0.2*(num_mem_dq/2 - 1));
+         0.2*(int)(num_mem_dq/2 - 1));
 
      k_noise_read_sen = k_noise_read * (1 + 0.1*(rtt1_dq_read/60 - 1) +
          0.2*(rtt2_dq_read/60 - 1) + 0.2*(r_on/34 - 1) +
-         0.2*(num_mem_dq/2 - 1));
+         0.2*(int)(num_mem_dq/2 - 1));
 
      k_noise_addr_sen = k_noise_addr * (1 + 0.1*(rtt_ca/50 - 1) +
          0.2*(r_on/34 - 1) + 0.2*(num_mem_ca/16 - 1));
@@ -1469,11 +1471,11 @@ IOTechParam::IOTechParam(InputParameter * g_ip, Mem_IO_type io_type1, int num_me
 
      t_jitter_setup_sen = t_jitter_setup * (1 + 0.2*(rtt1_dq_write/60 - 1) + 
          0.3*(rtt2_dq_write/60 - 1) + 0.1*(r_on/34 - 1) + 
-         0.3*(num_mem_dq/2 - 1));
+         0.3*(int)(num_mem_dq/2 - 1));
 
      t_jitter_hold_sen = t_jitter_hold * (1 + 0.2*(rtt1_dq_write/60 - 1) + 
          0.3*(rtt2_dq_write/60 - 1) + 
-         0.1*(r_on/34 - 1) + 0.3*(num_mem_dq/2 - 1));
+         0.1*(r_on/34 - 1) + 0.3*(int)(num_mem_dq/2 - 1));
 
      t_jitter_addr_setup_sen = t_jitter_addr_setup * (1 + 0.2*(rtt_ca/50 - 1) + 
          0.1*(r_on/34 - 1) + 0.4*(num_mem_ca/16 - 1));
@@ -1534,6 +1536,10 @@ IOTechParam::IOTechParam(InputParameter * g_ip, Mem_IO_type io_type1, int num_me
      t_soc_hold = 10; 
      t_jitter_setup = 20; 
      t_jitter_hold = 20;
+     t_jitter_addr_setup = 40; //SET THIS VAR TO A DEFAULT NUMBER TO AVOID UNDEFINED BEHAVIOUR. THIS NUMBER IS PROBABLY INCORRECT.
+     t_jitter_addr_hold = 40; //SET THIS VAR TO A DEFAULT NUMBER TO AVOID UNDEFINED BEHAVIOUR. THIS NUMBER IS PROBABLY INCORRECT.
+
+
 
      //External IO Configuration Parameters 
 
@@ -1579,7 +1585,7 @@ IOTechParam::IOTechParam(InputParameter * g_ip, Mem_IO_type io_type1, int num_me
 
 
    }
-	else
+  else
 	{
 		cout << "Not Yet supported" << endl;
 		exit(1);

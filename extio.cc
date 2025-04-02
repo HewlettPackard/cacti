@@ -500,7 +500,7 @@ void Extio::extio_eye()
 
 	printf("IO Timing Margin (ps) = ");
 	cout << io_tmargin <<endl;
-	printf("IO Votlage Margin (V) = ");
+	printf("IO Voltage Margin (V) = ");
 	cout << io_vmargin << endl;
 
 }
