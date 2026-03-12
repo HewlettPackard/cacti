@@ -63,7 +63,42 @@ InputParameter::InputParameter()
  cl_power_gated(false),
  interconect_power_gated(false),
  power_gating(false),
- cl_vertical (true)
+ cl_vertical (true),
+ addr_timing(1.0),
+ duty_cycle(1.0),
+ mem_density(4),
+ bus_bw(0),
+ activity_dq(1.0),
+ activity_ca(0.5),
+ bus_freq(800),
+ mem_data_width(8),
+ num_mem_dq(2),
+ num_clk(2),
+ num_ca(25),
+ num_dqs(18),
+ num_dq(72),
+ rtt_value(10000),
+ ron_value(34),
+ tflight_value(0),
+ iostate(WRITE),
+ dram_ecc(NO_ECC),
+ io_type(DDR3),
+ dram_dimm(UDIMM),
+ num_bobs(1),
+ capacity(80),
+ num_channels_per_bob(1),
+ first_metric(Cost),
+ second_metric(Bandwidth),
+ third_metric(Energy),
+ dimm_model(ALL),
+ low_power_permitted(false),
+ load(0),
+ row_buffer_hit_rate(0),
+ rd_2_wr_ratio(0),
+ same_bw_in_bob(true),
+ mirror_in_bob(false),
+ total_power(false),
+ verbose(false)
 {
 
 }
@@ -2543,6 +2578,11 @@ void output_data_csv(const uca_org_t & fin_res, string fn)
   }
   else
   {
+    // MODIFIED to output CACTI IO metrics
+    IOTechParam iot(g_ip, g_ip->io_type, g_ip->num_mem_dq, g_ip->mem_data_width, g_ip->num_dq,g_ip->dram_dimm, 1,g_ip->bus_freq ); 
+    Extio testextio(&iot);
+    // MODIFIED end
+
     if (print_index == true)
     {
       file << "Tech node (nm), ";
@@ -2586,6 +2626,14 @@ void output_data_csv(const uca_org_t & fin_res, string fn)
       file << "Ntsam_level_1, ";
       file << "Ntsam_level_2, ";
       file << "Tag arrary area efficiency %, ";
+
+      // MODIFIED to output CACTI IO metrics
+      file << "IO area, ";
+      file << "IO timing, ";
+      file << "IO power dynamic, ";
+      file << "IO power PHY, ";
+      file << "IO power termination and bias, ";
+      // MODIFIED end
 
 //      file << "Resistance per unit micron (ohm-micron), ";
 //      file << "Capacitance per unit micron (fF per micron), ";
@@ -2700,6 +2748,14 @@ void output_data_csv(const uca_org_t & fin_res, string fn)
     	file << "N/A" << ", ";
     }
 
+    // MODIFIED to output CACTI IO metrics
+    file << testextio.extio_area() << ", ";
+    file << testextio.extio_eye() << ", ";
+    file << testextio.extio_power_dynamic() << ", ";
+    file << testextio.extio_power_phy() << ", ";
+    file << testextio.extio_power_term() << ", ";
+    // MODIFIED end
+
 //    file << g_tp.wire_inside_mat.R_per_um << ", ";
 //    file << g_tp.wire_inside_mat.C_per_um / 1e-15 << ", ";
 //    file << g_tp.unit_len_wire_del / 1e-12 << ", ";
@@ -2733,7 +2789,7 @@ void output_UCA(uca_org_t *fr)
 	if(g_ip->is_3d_mem)
 	{
 
-		cout<<"-------  CACTI (version "<< VER_MAJOR_CACTI <<"."<< VER_MINOR_CACTI<<"."VER_COMMENT_CACTI
+		cout<<"-------  CACTI (version "<< VER_MAJOR_CACTI <<"."<< VER_MINOR_CACTI<<"." VER_COMMENT_CACTI
 								<< " of " << VER_UPDATE_CACTI << ") 3D DRAM Main Memory  -------"<<endl;
 
 		cout << "\nMemory Parameters:\n";
@@ -2810,17 +2866,17 @@ void output_UCA(uca_org_t *fr)
   }
   else {
     if (g_ip->data_arr_ram_cell_tech_type == 3) {
-      cout << "\n---------- CACTI (version "<< VER_MAJOR_CACTI <<"."<< VER_MINOR_CACTI<<"."VER_COMMENT_CACTI
+      cout << "\n---------- CACTI (version "<< VER_MAJOR_CACTI <<"."<< VER_MINOR_CACTI<<"." VER_COMMENT_CACTI
 								<< " of " << VER_UPDATE_CACTI << "), Uniform Cache Access " <<
         "Logic Process Based DRAM Model ----------\n";
     }
     else if (g_ip->data_arr_ram_cell_tech_type == 4) {
-      cout << "\n---------- CACTI (version "<< VER_MAJOR_CACTI <<"."<< VER_MINOR_CACTI<<"."VER_COMMENT_CACTI
+      cout << "\n---------- CACTI (version "<< VER_MAJOR_CACTI <<"."<< VER_MINOR_CACTI<<"." VER_COMMENT_CACTI
 								<< " of " << VER_UPDATE_CACTI << "), Uniform" <<
         "Cache Access Commodity DRAM Model ----------\n";
     }
     else {
-      cout << "\n---------- CACTI (version "<< VER_MAJOR_CACTI <<"."<< VER_MINOR_CACTI<<"."VER_COMMENT_CACTI
+      cout << "\n---------- CACTI (version "<< VER_MAJOR_CACTI <<"."<< VER_MINOR_CACTI<<"." VER_COMMENT_CACTI
 								<< " of " << VER_UPDATE_CACTI << "), Uniform Cache Access "
         "SRAM Model ----------\n";
     }

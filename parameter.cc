@@ -1621,15 +1621,15 @@ DynamicParameter::init_CAM()
 
   // calculate wire parameters
 
-  double c_b_metal = cell.h * wire_local.C_per_um;
+  //double c_b_metal = cell.h * wire_local.C_per_um;
 //  double C_bl;
 
-  c_b_metal = cam_cell.h * wire_local.C_per_um;//IBM and SUN design, SRAM array uses dummy cells to fill the blank space due to mismatch on CAM-RAM
+  //c_b_metal = cam_cell.h * wire_local.C_per_um;//IBM and SUN design, SRAM array uses dummy cells to fill the blank space due to mismatch on CAM-RAM
   V_b_sense = (0.05 * g_tp.sram_cell.Vdd > VBITSENSEMIN) ? 0.05 * g_tp.sram_cell.Vdd : VBITSENSEMIN;
   deg_bl_muxing = 1;//FA fix as 1
   // "/ 2.0" below is due to the fact that two adjacent access transistors share drain
   // contacts in a physical layout
-  double Cbitrow_drain_cap = drain_C_(g_tp.cam.cell_a_w, NCH, 1, 0, cam_cell.w, false, true) / 2.0;//TODO: comment out these two lines
+  //double Cbitrow_drain_cap = drain_C_(g_tp.cam.cell_a_w, NCH, 1, 0, cam_cell.w, false, true) / 2.0;//TODO: comment out these two lines
 //  C_bl = num_r_subarray * (Cbitrow_drain_cap + c_b_metal);
   dram_refresh_period = 0;
 
@@ -1782,15 +1782,15 @@ DynamicParameter::init_FA()
   cell.w = g_tp.sram.b_w + 2 * wire_local.pitch * (g_ip->num_rw_ports -1 + (g_ip->num_rd_ports - g_ip->num_se_rd_ports)
       + g_ip->num_wr_ports) + g_tp.wire_local.pitch * g_ip->num_se_rd_ports + 2 * wire_local.pitch*(g_ip->num_search_ports-1);
 
-  double c_b_metal = cell.h * wire_local.C_per_um;
+  //double c_b_metal = cell.h * wire_local.C_per_um;
   //  double C_bl;
 
-  c_b_metal = cam_cell.h * wire_local.C_per_um;//IBM and SUN design, SRAM array uses dummy cells to fill the blank space due to mismatch on CAM-RAM
+  //c_b_metal = cam_cell.h * wire_local.C_per_um;//IBM and SUN design, SRAM array uses dummy cells to fill the blank space due to mismatch on CAM-RAM
   V_b_sense = (0.05 * g_tp.sram_cell.Vdd > VBITSENSEMIN) ? 0.05 * g_tp.sram_cell.Vdd : VBITSENSEMIN;
   deg_bl_muxing = 1;//FA fix as 1
   // "/ 2.0" below is due to the fact that two adjacent access transistors share drain
   // contacts in a physical layout
-  double Cbitrow_drain_cap = drain_C_(g_tp.cam.cell_a_w, NCH, 1, 0, cam_cell.w, false, true) / 2.0;//TODO: comment out these two lines
+  //double Cbitrow_drain_cap = drain_C_(g_tp.cam.cell_a_w, NCH, 1, 0, cam_cell.w, false, true) / 2.0;//TODO: comment out these two lines
   //	  C_bl = num_r_subarray * (Cbitrow_drain_cap + c_b_metal);
   dram_refresh_period = 0;
 

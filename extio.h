@@ -10,11 +10,11 @@ public:
   
   Extio(IOTechParam *); 
     	
-	void extio_area(); 
-	void extio_eye(); 
-	void extio_power_dynamic(); 
-	void extio_power_phy(); 
-	void extio_power_term(); 
+	double extio_area(); 
+	double extio_eye(); 
+	double extio_power_dynamic(); 
+	double extio_power_phy(); 
+	double extio_power_term(); 
 
 private:
   IOTechParam *io_param;  
